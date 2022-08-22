@@ -1,7 +1,9 @@
 import socket
+from termios import FF1
 import threading as thr
 import tkinter as tk
 import atexit
+from PIL import Image
 
 def whenexit():
     sock.sendto("EXIT".encode(), ("127.0.0.1", 1234))
@@ -25,14 +27,14 @@ def Read():
         print(tmp[0].decode())
         
 class Graphics: 
-    def new_page(self,win):
-        pass
+    
     def Isin(self,win):
         file=open("/home/tom/vscode/idea/socqq/name.txt","w")
         file.close()
         file = open("/home/tom/vscode/idea/socqq/name.txt", "r")
         name=file.read()
         file.close()
+        
         sock.sendto(str("LOGIN "+name).encode(), ("127.0.0.1", 1234))
         tmp=sock.recvfrom(200)
         r = thr.Thread(target=Read)
@@ -44,19 +46,23 @@ class Graphics:
             self.back_page(win)
             print("old")
     def back_page(self,win):
-        '''
-        win.geometry("400x150")
+        win.geometry("210x240")
         win.title("欢迎!")
-        f1=tk.Frame(win,background='blue',width=150,height=50)
-        f1.pack()
-        f2=tk.Frame()
-        name = ""
-        self.ent=tk.Entry(win)
+        win.config(background="#C0D9D9")
         
-        sock.sendto("LOGIN "+str(name).encode(), ("127.0.0.1", 1234))
-        self.friend_list()
-        pass
-        '''
+        self.pic = tk.PhotoImage(file="/home/tom/vscode/github/--1/furry.gif")
+        self.lab=tk.Label(win,text="hh",image=self.pic,activebackground='green',width=80,height=60)
+        self.lab.place(x=65,y=10)  
+        #self.friend_list()
+    def new_page(self,win):
+        self.back_page(win)  
+        f1=tk.LabelFrame(win)
+        f1.place(x=20,y=110)
+        ent = tk.Entry(f1, text="a new name",selectbackground="green",width=13)
+        ent.pack()
+        but=tk.Button(text="login",)
+        but.place(x=150,y=200)
+#get and write to file
     def friend_list(self,win):
         tmp = thr.Thread(target=self.talk_with)
         pass

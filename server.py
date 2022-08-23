@@ -20,7 +20,7 @@ class users:
     
     def Login(self,tup):
         name=tup[0][6::].decode()
-        if name=='':
+        if name=='' or name not in self.users:
             return ''
              
         if name not in self.users.keys():

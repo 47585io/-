@@ -1,3 +1,4 @@
+from email.iterators import typed_subpart_iterator
 import socket
 from concurrent import futures as fu
 import multiprocessing as mut
@@ -20,9 +21,9 @@ class users:
     
     def Login(self,tup):
         name=tup[0][6::].decode()
-        if name=='' or name not in self.users:
+        if name=='':
             return ''
-             
+        print(name)     
         if name not in self.users.keys():
             self.users[name]=tup[1]
         if name not in self.users_friend:
@@ -36,7 +37,10 @@ class users:
             return 1
         return 0
     def addfriend(self,tup):
-        pass
+        if self.users.values() == tup[1]:
+            return ""
+        addr=str(self.users.items())       
+        return addr
 
 def str_to_tuple(src):
     src = src.decode()
@@ -71,7 +75,9 @@ class message:
             lis=[tmp[1],what]
             return lis
         elif tmp[0].decode().startswith("ADDfriend"):
-            pass
+            addr=usr.addfriend(tmp)
+            lis=[tmp[1],addr]
+            return lis
         else:
             lis = str_to_tuple(tmp[0])
             if usr.Isin(lis):
@@ -79,27 +85,32 @@ class message:
             lis=(tmp[1],"no user!")
             return lis
     
-    def talk_to(self):
+    def talk_to(self,sock):
         while 1:
-            tmp = sock.recvfrom(256)
+            sock_count=0
+            tmp = sock.recvfrom(1024)
             print("接收", tmp[0])
             lis=self.bbmess(tmp)            
             print("发送", lis)
-            sock.sendto(lis[1].encode(), lis[0])
+            
+            while sock_count < len(lis):
+                   sock_count += sock.sendto(lis[1].encode(), lis[0])
             #it must be a str
                         
-def start():
+def start_user(sock):
     pool = fu.ThreadPoolExecutor(MAX)
     for i in range(MAX):
-        pool.submit(me.talk_to)
-    me.talk_to()    
+        pool.submit(me.talk_to,args=(sock,))
+    me.talk_to(sock)    
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind(("127.0.0.1", 1234))
 me=message()
 usr=users()
 for i in range(MAX):   
-    pro=mut.Process(target=start)
+    pro=mut.Process(target=start_user,args=(sock,))
     pro.start()
-start()
+start_user(sock)
+me.talk_to()
 #any pro can open sline,and call talk_to, and any sline can call talk_to
+

@@ -3,7 +3,7 @@ import socket
 from concurrent import futures as fu
 import multiprocessing as mut
 import atexit
-MAX=1
+PRO_MAX=1
 
 def whenexit():
     sock.close()
@@ -24,7 +24,7 @@ class users:
         if name=='':
             return ''
         print(name)     
-        if name not in self.users.keys():
+        if tup not in self.users.values():
             self.users[name]=tup[1]
         if name not in self.users_friend:
             self.users_friend[name]=[]
@@ -33,6 +33,8 @@ class users:
         name+=str(self.users_friend[name])
         return name
     def Isin(self,tup):
+        for i in self.now_in:
+            pass
         if tup[0] in self.now_in:
             return 1
         return 0
@@ -102,8 +104,8 @@ class message:
             #it must be a str
                         
 def start_user(sock):
-    pool = fu.ThreadPoolExecutor(MAX)
-    for i in range(MAX):
+    pool = fu.ThreadPoolExecutor(PRO_MAX*2)
+    for i in range(PRO_MAX):
         pool.submit(me.talk_to,args=(sock,))
     me.talk_to(sock)    
 
@@ -111,10 +113,9 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind(("127.0.0.1", 1234))
 me=message()
 usr=users()
-for i in range(MAX):   
+for i in range(PRO_MAX):   
     pro=mut.Process(target=start_user,args=(sock,))
     pro.start()
 start_user(sock)
-me.talk_to()
 #any pro can open sline,and call talk_to, and any sline can call talk_to
 

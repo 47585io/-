@@ -40,14 +40,19 @@ class mess:
                 del self.MessCache[0]
                 self.index-=1
             print(tmp[0])
-    
+            #print(self.talk_spilt(tmp[0]))
+
+    @staticmethod    
     def talk_spilt(str):
+      try:
         i=0
         while str[i]!="$":
             i+=1
         i+=1
         new_str=str[i::]        
         return new_str
+      except Exception:
+        print("error talk")
 
 My_Mess=mess()   
     
@@ -62,7 +67,7 @@ class friends:
         my_name=""
         self.friend_list={}
         self.now_talk_with=[]
-        
+        self.have_friend={}
     def spilt(self,src):
         addr=""
         name=""
@@ -119,9 +124,8 @@ class friends:
                             #print(port)
                             break                           
                 i+=1
-            if addr==my_addr and port ==my_port:
-                pass
-            self.friend_list[name]=(addr,port)
+            if addr!=my_addr and port !=my_port:
+                self.friend_list[name]=(addr,port)
                      
     def addfriend(self): 
       try:
@@ -142,15 +146,16 @@ my=friends()
 sock=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 sock.bind(("",0))
 my_addr,my_port=sock.getsockname()
-
+my_name=""
 
 
 class Graphics:   
     def Isin(self,win):
+        global my_name
         win.resizable(0,0)
         file = open("/home/tom/vscode/idea/socqq/name.txt", "r+")
-        name=file.read()   
-        My_Mess.Send(str("LOGIN "+name))
+        my_name=file.read()   
+        My_Mess.Send(str("LOGIN "+my_name))
         tmp=My_Mess.get()
         
         if tmp=="":
@@ -196,18 +201,44 @@ class Graphics:
         but.place(x=150,y=200)  
 #get and write to file
 
-    def addfriend(self):
+    def addfriend(self,win):
         my.addfriend()
-        
-
+        self.list=tk.Listbox(win)
+        self.list.place(x=0,y=0)
+        i=0
+        for name in my.friend_list.keys():
+            self.list.insert(i,name)
+            i+=1
+        def Return():
+            self.list.place_forget()
+            self.but.place_forget()    
+            
+        self.but =tk.Button(text="return",command=Return)
+        self.but.place(x=130,y=200)
+        def Ok():
+            self.labgroup=[]
+            
+            self.labgroup.append
+        self.enter=tk.Button(text="Ok",command=Ok)
+            
     def friend_list(self,win):
-        fa1 = tk.Frame(win, background='#C0D9B9',width=210,height=40)
+        fa1 = tk.Frame(win, background='#C0D9B9',width=210,height=50)
         fa1.pack()
+        lab=tk.Label(fa1,image=self.pic,
+                            activebackground='green',width=60,)
+        lab.place(x=0,y=0)
+        lab2=tk.Label(fa1,font=(0,8),text=my_name+"localhost"+" "+str(my_port),background='#C0D9B9',width=12,anchor="nw",)
+        lab2.place(x=60,y=0)
         if not my.friend_list:
-            lab=tk.Label(text="No Friens!",font=(30,),background="#C0D9D9")
-            lab.pack()
-        add=tk.Button(text="add friends",command=self.addfriend)
-        add.pack()
+            lab3=tk.Label(text="No Friends!",font=(30),background="#C0D9D9",height=4)
+            lab3.pack()
+        
+        menu = tk.Menu(win, tearoff=False, activebackground="pink")
+        menu.add_command(label="add",command=lambda :self.addfriend(win))
+        def pos(enxy):
+            menu.post(enxy.x_root, enxy.y_root)
+        win.bind("<Button-3>", pos)
+        
         win.update()
         #self.talk_with()
         input("按任意键开始")
@@ -217,14 +248,19 @@ class Graphics:
     def talk_with(self):
         #win=tk.Tk()       
        # win.mainloop()
+        for user in my.friend_list.keys():
+           to = my.friend_list[user]
+           My_Mess.Send("init", to)
         while 1:   
             s=input()  
-            print("input")
-            for user in my.friend_list.keys():  
-                print("key")
+            print("input",)
+            if s!="" or s:
+              for user in my.friend_list.keys():  
+                print("key",)
                 to= my.friend_list[user]
                 print("to")
                 My_Mess.Send(s,to)
+                
             
     
 def start():  

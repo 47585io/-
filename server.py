@@ -63,6 +63,8 @@ def str_to_tuple(src):
     tup.append(a)
     return tup
 
+def tuple_to_str(tup):
+    return str(tup[0])+"&"+str(tup[1])+"$"
 
 class message:
     def __init__(self):
@@ -80,6 +82,8 @@ class message:
             return lis
         else:
             lis = str_to_tuple(tmp[0])
+            src_lis=tuple_to_str(tmp[1])
+            lis[1]=src_lis+lis[1]
             if usr.Isin(lis):
                 return lis
             lis=(tmp[1],"no user!")

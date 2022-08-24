@@ -1,4 +1,5 @@
 from fileinput import filelineno
+from os import TMP_MAX
 import socket
 from termios import FF1
 import threading as thr
@@ -7,6 +8,49 @@ import tkinter as tk
 import atexit
 from PIL import Image
 
+class mess:
+    def __init__(self) -> None:
+        self.MessCache=[]
+        self.index=-1
+        self.NewMess=""
+        self.yes=0
+    def get(self):
+        while 1:
+            if self.yes:
+                self.NewMess = self.MessCache[self.index]
+                del self.MessCache[self.index]
+                self.index-=1
+                self.yes=0
+                return self.NewMess
+
+    def Send(self,send_str, to_user=None):
+        sock_count = 0  
+        if to_user:     
+            send_str = str(to_user[0])+"&" + str(to_user[1])+"$"+send_str
+        while sock_count < len(send_str):
+            sock_count += sock.sendto(send_str.encode(), ("127.0.0.1", 1234))
+
+    def Read(self):
+        while 1:
+            tmp = sock.recvfrom(1024)
+            self.MessCache.append(tmp[0].decode())
+            self.yes=1
+            self.index+=1
+            if(self.index>=10):
+                del self.MessCache[0]
+                self.index-=1
+            print(tmp[0])
+    
+    def talk_spilt(str):
+        i=0
+        while str[i]!="$":
+            i+=1
+        i+=1
+        new_str=str[i::]        
+        return new_str
+
+My_Mess=mess()   
+    
 def whenexit():
     sock.sendto("EXIT".encode(), ("127.0.0.1", 1234))
     sock.recvfrom(200)
@@ -81,12 +125,12 @@ class friends:
                      
     def addfriend(self): 
       try:
-        Send("ADDfriend",)
-        tmp=sock.recvfrom(1024)  
+        My_Mess.Send("ADDfriend",)
+        tmp=My_Mess.get()
         print(tmp[0])
         if not tmp[0]:
             return
-        self.spilt(tmp[0].decode())
+        self.spilt(tmp)
         print(self.friend_list)
       except Exception:
           print("hggh")
@@ -100,27 +144,16 @@ sock.bind(("",0))
 my_addr,my_port=sock.getsockname()
 
 
-def Send(send_str,to_user=""):
-    sock_count=0 
-    to_user_str=""
-    if to_user!="":
-        to_user_str=to_user
-    send_str = to_user_str+send_str
-    while sock_count<len(send_str):
-        sock_count+=sock.sendto(send_str.encode(),("127.0.0.1",1234))
-def Read():
-    while 1:
-        tmp=sock.recvfrom(1024)
-        print(tmp[0].decode())
-        
+
 class Graphics:   
     def Isin(self,win):
+        win.resizable(0,0)
         file = open("/home/tom/vscode/idea/socqq/name.txt", "r+")
         name=file.read()   
-        Send(str("LOGIN "+name))
-        tmp=sock.recvfrom(200)
+        My_Mess.Send(str("LOGIN "+name))
+        tmp=My_Mess.get()
         
-        if tmp[0].decode()=="":
+        if tmp=="":
             self.new_page(win,file)
             print("new")
         else:
@@ -150,7 +183,7 @@ class Graphics:
         ent.pack()  
         
         def login():
-            Send("LOGIN "+ent.get())
+            My_Mess.Send("LOGIN "+ent.get())
             buf = ent.get()
             file.write(buf)
             file.close()
@@ -161,41 +194,42 @@ class Graphics:
             
         but = tk.Button(text="login", command=login,background="#C0D9D9",activebackground='pink')
         but.place(x=150,y=200)  
-       
 #get and write to file
+
+    def addfriend(self):
+        my.addfriend()
+        
+
     def friend_list(self,win):
         fa1 = tk.Frame(win, background='#C0D9B9',width=210,height=40)
         fa1.pack()
         if not my.friend_list:
-            self.lab.config(text="No Friens!",font=(30,),background="#C0D9D9")
-            self.lab.pack()
-        add=tk.Button(text="add friends",command=my.addfriend)
+            lab=tk.Label(text="No Friens!",font=(30,),background="#C0D9D9")
+            lab.pack()
+        add=tk.Button(text="add friends",command=self.addfriend)
         add.pack()
         win.update()
         #self.talk_with()
-        
-        input()
-        r = thr.Thread(target=Read)
-        r.start()
-        
-        tmp = thr.Thread(target=self.talk_with)
-        tmp.start()
+        input("按任意键开始")
+        s=thr.Thread(target=self.talk_with)
+        s.start()
         
     def talk_with(self):
-        #win=tk.Tk()
-        
+        #win=tk.Tk()       
        # win.mainloop()
         while 1:   
             s=input()  
             print("input")
             for user in my.friend_list.keys():  
                 print("key")
-                to= str(my.friend_list[user][0])+"&"+str(my.friend_list[user][1])+"$"
+                to= my.friend_list[user]
                 print("to")
-                Send(s,to)
+                My_Mess.Send(s,to)
             
     
-def start():   
+def start():  
+    r = thr.Thread(target=My_Mess.Read)
+    r.start()
     user=Graphics()
     win=tk.Tk()
     user.Isin(win)

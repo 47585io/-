@@ -34,17 +34,31 @@ class users:
         else:
             tmp[new_tup[0]]=new_tup[1]
             going_search_queue.put(tmp)
-        
+    def getto(self,going_get_queue,index):
+        '''get queue's dict or list index element'''
+        tmp=going_get_queue.get()
+        going_get_queue.put(tmp)
+        return tmp[index]
     def add(self,tup):
         '''when a new user, call it'''
-        self.search(self.now_in,"hello")
+        self.search(self.users,tup)
+        self.search(self.friend_list,(tup[0],[]))
+        self.search(self.now_in,tup[0])
+        self.search(self.cache,(tup[0],[]))
         tmo=self.now_in.get()
         self.now_in.put(tmo)
         print(tmo)
     def Login(self,tup):
         '''when user login, call it'''
-        self.add("&")
-        return 'hello'
+        name = tup[0].decode()
+        name = name[6::]
+        if name == '':
+            return ''
+        self.add((name,tup[1]))
+        friend=self.getto(self.friend_list,name)
+        return name+str(friend)
+    def addfriend(self):
+        pass
         
 class message:
     '''read and process and send user send's mess'''
@@ -82,9 +96,7 @@ class message:
 
     def Send(self, lis):
         '''send bytes, can redefine in sonclass'''
-        sock_count = 0
-        while sock_count < len(lis[0]):
-            sock_count += self.sock.sendto(lis[0], lis[1])
+        self.sock.sendto(lis[0], lis[1])
             #the lis[0] is from@str, lis[1] is send to addr
 
 

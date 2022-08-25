@@ -33,10 +33,8 @@ class UDP_Mess:
                 return self.NewMess
 
     def Send(self, sock,send_str, to_user=None):
-        sock_count = 0
         send_str = Spilt_Mess.Send_spilt(send_str,to_user)
-        while sock_count < len(send_str):
-                sock_count += sock.sendto(send_str, ("127.0.0.1", 1234))
+        sock.sendto(send_str, ("127.0.0.1", 1234))
 
     def Read(self,sock):
         while 1:

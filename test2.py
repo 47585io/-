@@ -13,18 +13,18 @@ Mess_Buffer = 1024
 class users:
     '''have all date for all process'''
 
-    
-    users = mut.Queue()
-    users.put({})
-     #have  a dict, {name:(addr,port)}  #save all user, and their addr,port tup
-    friend_list = mut.Queue()
-    friend_list.put({})
-     #hava a dict, {name[friendname]}  #save user name , and he has friend name list
-    now_in = mut.Queue()
-    now_in.put([])
-    # have a list, [name] #save now_in user
-    cache = mut.Queue()
-    cache.put({})
+    def __init__(self):
+        self.users = mut.Queue()
+        self.users.put({})
+        #olny have  a dict, {name:(addr,port)}  #save all user, and their addr,port tup
+        self.friend_list = mut.Queue()
+        self.friend_list.put({})
+        #olny hava a dict, {name[friendname]}  #save user name , and he has friend name list
+        self.now_in = mut.Queue()
+        self.now_in.put([])
+        #olny have a list, [name] #save now_in user
+        self.cache = mut.Queue()
+        self.cache.put({})
         #olny hava a dict, {name:[cachemess]} #sava can't send str, wait that user login, send all to
 
     def search(self, going_search_queue, new_tup):
@@ -53,6 +53,12 @@ class users:
         self.now_in.put(tmo)
         print(tmo)
 
+    def get_friend_list(self):
+        tmp = self.users.get()
+        self.users.put(tmp)
+        return str(tmp.keys())
+        return
+
     def Login(self, tup):
         '''when user login, call it'''
         name = tup[0].decode()
@@ -67,6 +73,8 @@ class users:
         pass
 
 
+USERS = users()
+
 class message:
     '''read and process and send user send's mess'''
 #you can put a dict in queue
@@ -76,36 +84,41 @@ class message:
     def __init__(self, tup=("127.0.0.1", 1234)) -> None:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind(tup)
-        self.USERS = users()
 
-    def bbmess(self, tmp):
+    def bbmess(self, tmp,USERS):
         '''process going to send str'''
         lis = []
     #if user login, call login get username and friend_list, the end , send mess to src user
         if tmp[0].decode().startswith("LOGIN"):
-            s = self.USERS.Login(tmp)
-            lis.extend((s.encode(), tmp[1]))
+            s =USERS.Login(tmp)
+            lis.extend((s, tmp[1]))
             return lis
-        #login return a decode str,OK,then let us to encode
+
+        #if user want to addfriend, return the users name
+        elif tmp[0].decode().startswith("AddFriend"):
+            lis.append(USERS.get_friend_list())
+            lis.append(tmp[1])
+            return lis
 
     #default, the mess is name@str, read it , get the str and name, send str to name, and add mess from(my_name@str)
     #so send my_name@str to name's addr
         else:
-            pass
+            return ""
 
-    def talk_to(self, *arg):
+    def talk_to(self, USERS):
         '''the talk_to going to recv a bytes mess from a user, after process, it send a bytes mess to other user'''
         while True:
             tmp = self.sock.recvfrom(Mess_Buffer)
             print("接收", tmp)
-            lis = self.bbmess(tmp)
+            lis = self.bbmess(tmp,USERS)
             print("发送", lis)
             self.Send(lis)
 
     def Send(self, lis):
         '''send bytes, can redefine in sonclass'''
-        self.sock.sendto(lis[0], lis[1])
+        self.sock.sendto(lis[0].encode(), lis[1])
         #the lis[0] is from@str, lis[1] is send to addr
+        #login return a decode str,OK,then let us to encode
 
 
 class Group_Mess(message):
@@ -164,7 +177,7 @@ def main(messes, arg):
 # like below
 
 
-messes = [message(), Group_Mess(),message(("127.0.0.1",1238))]
+messes = [message(), Group_Mess(), message(("127.0.0.1", 1256))]
 messes.append(messes[0])
 # messes.append(users())
 
@@ -178,7 +191,7 @@ def whenexit():
 
 atexit.register(whenexit)
 
-main(messes, 0)
+main(messes, USERS)
 
 # and, the list's element type can no message, but it must have func talk_to
 # and, I have prepared a parameter interface for you

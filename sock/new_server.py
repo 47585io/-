@@ -9,11 +9,6 @@ PRO_MAX = 1
 Mess_Buffer=1024
 # 设置每一个sock cache buffer size
 
-def whenexit():
-    '''when exit, close all sock'''
-    for mess in messes:
-        mess.sock.close()
-atexit.register(whenexit)
 
 
 class users:
@@ -123,7 +118,7 @@ class message:
 class Group_Mess(message):
     '''the group also is a user, but it's in server, and it's port in 1236, it's friend is all user in group, it's now_in user is now_in group's user'''
     def __init__(self,messtype="UDP",messaddr=("127.0.0.1",1236)) -> None:
-        message.__init__(self,messtype,messaddr)
+        message.__init__(self,messaddr)
     def talk_to(self, *arg):
       while 1:
         str,addr=self.sock.recvfrom(Mess_Buffer)
@@ -173,6 +168,18 @@ def main(messes, arg):
 messes = [message(),Group_Mess()]
 #messes.append(messes[0])
 # messes.append(users())
+
+
+def whenexit():
+    '''when exit, close all sock'''
+    for mess in messes:
+        mess.sock.close()
+
+
+atexit.register(whenexit)
+
+
+
 main(messes,0)
 
 # and, the list's element type can no message, but it must have func talk_to

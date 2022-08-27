@@ -199,18 +199,26 @@ class Spilt_Mess:
 
 
 def start(mess, arg):
-    pool = fu.ThreadPoolExecutor(PRO_MAX)
+    #pool = fu.ThreadPoolExecutor(PRO_MAX)
     for i in range(PRO_MAX):
-        pool.submit(mess.talk_to, args=(arg,))
+        s=th.Thread(target=mess.talk_to, args=(arg,))
+        s.setDaemon(True)
+        s.start()
+        #pool.submit(mess.talk_to, args=(arg,))
     mess.talk_to(arg)
 #all sline share date on the process
 
-
 def main(messes, arg):
+    pro_list=[]
     for mess in messes:
         pro = mut.Process(target=start, args=(mess, arg))
         pro.start()
-    start(messes[0], arg)
+        pro_list.append(pro)
+    #start(messes[0], arg)
+    input()
+    for pro in pro_list:
+        pro.kill()
+    exit(0)
 
 #The one process olny have a mess server, a mess server can in diffrent port or process, but their share queue
 # any pro can open sline,and call talk_to, and any sline can call talk_to

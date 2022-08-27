@@ -230,8 +230,7 @@ class Graphics:
         self.can_yscro.config(command=self.can.yview)
 
     def welcome(self):
-        self.lbtmp.config(
-            text="Welcome!", foreground=self.Color["fg"], background=self.Color["bg"])
+        self.lbtmp.config(text="Welcome!\n\n 一切刚刚好",font=(self.Font["zheng"],25,'bold'), foreground=self.Color["fg"], background=self.Color["bg"],width=10)
         self.lbtmp.place(x=0, y=0)
         self.bgfarme.update()
 
@@ -241,8 +240,9 @@ class Graphics:
         # And below, that lab have many, but their going to while use
         self.friend_list_but = []
         self.Win_Size = [(360, 450, 1600, 1000)]
-        self.Color = {"bg": "#282c34", "fg": "#abb2bf"}
-        self.Font = {"cute": ()}
+        self.Color = {"bg": "#282c34", "fg": "#abb2bf",}
+        self.Font = {"zheng": "DejaVu Sans", "alpha": "Quicksand", "drak": "Quicksand Medium",
+                     "small": "Z003", "buteful": "DejaVu Math TeX Gyre", "frmory": "Dingbats"}
     # the diffrent page win size
 # why i am not use __init__? because the lab must after init window
         self.set_win(win)
@@ -276,6 +276,7 @@ GNU = Graphics()
 def main(mess, sock, friends, gra):
     mess.Send(sock, "LOGIN "+USER_NAME)
     r = th.Thread(target=mess.Read, args=(sock,))
+    r.setDaemon(True)
     r.start()
     sleep(1)
     win = tk.Tk()

@@ -23,6 +23,8 @@ def whenexit():
     '''when exit, close all sock'''
     UDP_SOCK.close()
     TCP_SOCK.close()
+
+
 atexit.register(whenexit)
 
 
@@ -185,16 +187,17 @@ class Spilt_Mess:
 
 class Graphics:
     '''you can use it, also can not use'''
-    def set_input(self,size=(0,0)):
+
+    def set_input(self, size=(0, 0)):
         self.entfarme = tk.Frame(self.bgfarme, background=self.Color["bg"])
         self.xscro = tk.Scrollbar(self.entfarme, orient=tk.HORIZONTAL)
         self.ent = tk.Entry(self.entfarme, xscrollcommand=self.xscro.set)
         self.xscro.config(command=self.ent.xview)
-    #after set, please pack them, self.entfarme.place()   self.ent.pack()   self.xscro.pack(fill=tk.X)
-    
-    def set_win(self,win):
+    # after set, please pack them, self.entfarme.place()   self.ent.pack()   self.xscro.pack(fill=tk.X)
+
+    def set_win(self, win):
         '''quick config a win'''
-        win.config(bg=self.Color["bg"],)  
+        win.config(bg=self.Color["bg"],)
         win.title("Sock QQ")
         win.geometry(self.geosize())
         win.resizable(0, 0)
@@ -203,53 +206,61 @@ class Graphics:
             win, background=self.Color["bg"], width=self.Win_Size[0][0], height=self.Win_Size[0][1])
         self.bgfarme.pack()
         self.bgfarme.update()
-    #olny set once
-        
-    def set_friends(self,friends):
+    # olny set once
+
+    def set_friends(self, friends):
         '''show friend_list'''
-        while len(self.friend_list_but)<len(friends):
+        while len(self.friend_list_but) < len(friends):
             self.friend_list_but.append(tk.Button())
-        i=0
-        while i<len(self.friend_list_but):
-            self.friend_list_but[i].config(text=friends[i],bg=str(random.randint))
+        i = 0
+        while i < len(self.friend_list_but):
+            self.friend_list_but[i].config(
+                text=friends[i], bg=str(random.randint))
+
     def Canvas_mess(Canvas):
         Canvas.g()
+
     def talk_lab():
         pass
+
     def Canvas_config(self,):
         '''quick config a have scro Canvas'''
-        self.can_yscro=tk.Scrollbar(self.bgfarme,)
-        self.can=tk.Canvas(self.bgfarme,yscrollcommand=self.can_yscro.set)
+        self.can_yscro = tk.Scrollbar(self.bgfarme,)
+        self.can = tk.Canvas(self.bgfarme, yscrollcommand=self.can_yscro.set)
         self.can_yscro.config(command=self.can.yview)
+
     def welcome(self):
-        self.lbtmp.config(text="Welcome!", foreground=self.Color["fg"],background=self.Color["bg"])
-        self.lbtmp.place(x=0,y=0)
+        self.lbtmp.config(
+            text="Welcome!", foreground=self.Color["fg"], background=self.Color["bg"])
+        self.lbtmp.place(x=0, y=0)
         self.bgfarme.update()
-    def init(self,win) -> None:
-        '''set you config'''       
-        #On the this Label going to use many count, but their olny sava once
-        #And below, that lab have many, but their going to while use
+
+    def init(self, win) -> None:
+        '''set you config'''
+        # On the this Label going to use many count, but their olny sava once
+        # And below, that lab have many, but their going to while use
         self.friend_list_but = []
         self.Win_Size = [(360, 450, 1600, 1000)]
         self.Color = {"bg": "#282c34", "fg": "#abb2bf"}
         self.Font = {"cute": ()}
-    #the diffrent page win size
-#why i am not use __init__? because the lab must after init window 
+    # the diffrent page win size
+# why i am not use __init__? because the lab must after init window
         self.set_win(win)
-        self.lbtmp=tk.Label(self.bgfarme)  
-        self.welcome()       
-        
-    def geosize(self,tup=None):
+        self.lbtmp = tk.Label(self.bgfarme)
+        self.welcome()
+
+    def geosize(self, tup=None):
         if tup:
             return str(tup[0][0])+"x"+str(tup[0][1])+"+"+str(tup[0][2])+"+"+str(tup[0][3])
         return str(self.Win_Size[0][0])+"x"+str(self.Win_Size[0][1])+"+"+str(self.Win_Size[0][2])+"+"+str(self.Win_Size[0][3])
+
     def quickconfig(self, win):
         '''you can call it use defalut config'''
         self.init(win)
-        
-        #self.bgfarme.destroy()
-    def First_Page(self,win):
-        
+
+        # self.bgfarme.destroy()
+    def First_Page(self, win):
+
         pass
 
     def Second_Page(self):
@@ -270,6 +281,7 @@ def main(mess, sock, friends, gra):
     win = tk.Tk()
     gra.quickconfig(win)
     win.mainloop()
+
 
 main(UDP, UDP_SOCK, Friend_List, GNU)
 

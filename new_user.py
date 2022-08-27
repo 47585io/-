@@ -17,7 +17,10 @@ TCP_SOCK = socket.socket()
 TCP_SOCK.bind(("", 0))
 # the user, olny two port with server
 USER_NAME = ""
-
+Is_Loding=1
+#...
+MAX_THD=1
+#the user can use every work max thread
 
 def whenexit():
     '''when exit, close all sock'''
@@ -184,104 +187,111 @@ class Spilt_Mess:
         index = s_str.find(':')
         return (int(s_str[0:index:]), s_str[index+1::])
 
-
-class Graphics:
-    '''you can use it, also can not use'''
-
-    def set_input(self, size=(0, 0)):
-        self.entfarme = tk.Frame(self.bgfarme, background=self.Color["bg"])
-        self.xscro = tk.Scrollbar(self.entfarme, orient=tk.HORIZONTAL)
-        self.ent = tk.Entry(self.entfarme, xscrollcommand=self.xscro.set)
-        self.xscro.config(command=self.ent.xview)
-    # after set, please pack them, self.entfarme.place()   self.ent.pack()   self.xscro.pack(fill=tk.X)
-
-    def set_win(self, win):
-        '''quick config a win'''
-        win.config(bg=self.Color["bg"],)
-        win.title("Sock QQ")
-        win.geometry(self.geosize())
-        win.resizable(0, 0)
-        #win.protocol('WM_DELETE_WINDOW',lambda :exit(0))
-        self.bgfarme = tk.Frame(
-            win, background=self.Color["bg"], width=self.Win_Size[0][0], height=self.Win_Size[0][1])
-        self.bgfarme.pack()
-        self.bgfarme.update()
-    # olny set once
-
-    def set_friends(self, friends):
-        '''show friend_list'''
-        while len(self.friend_list_but) < len(friends):
-            self.friend_list_but.append(tk.Button())
-        i = 0
-        while i < len(self.friend_list_but):
-            self.friend_list_but[i].config(
-                text=friends[i], bg=str(random.randint))
-
-    def Canvas_mess(Canvas):
-        Canvas.g()
-
-    def talk_lab():
-        pass
-
-    def Canvas_config(self,):
-        '''quick config a have scro Canvas'''
-        self.can_yscro = tk.Scrollbar(self.bgfarme,)
-        self.can = tk.Canvas(self.bgfarme, yscrollcommand=self.can_yscro.set)
-        self.can_yscro.config(command=self.can.yview)
-
-    def welcome(self):
-        self.lbtmp.config(text="Welcome!\n\n 一切刚刚好",font=(self.Font["zheng"],25,'bold'), foreground=self.Color["fg"], background=self.Color["bg"],width=10)
-        self.lbtmp.place(x=0, y=0)
-        self.bgfarme.update()
-
-    def init(self, win) -> None:
-        '''set you config'''
-        # On the this Label going to use many count, but their olny sava once
-        # And below, that lab have many, but their going to while use
-        self.friend_list_but = []
-        self.Win_Size = [(360, 450, 1600, 1000)]
-        self.Color = {"bg": "#282c34", "fg": "#abb2bf",}
-        self.Font = {"zheng": "DejaVu Sans", "alpha": "Quicksand", "drak": "Quicksand Medium",
-                     "small": "Z003", "buteful": "DejaVu Math TeX Gyre", "frmory": "Dingbats"}
-    # the diffrent page win size
-# why i am not use __init__? because the lab must after init window
-        self.set_win(win)
-        self.lbtmp = tk.Label(self.bgfarme)
-        self.welcome()
-
+class Welcome:
+    LAB_Count=2
+    BUT_Count=2
+    win=tk.Tk()
+    def __init__(self) -> None:
+        self.func=[]
+        self.index=0
+        self.Win_Size=[(360, 450, 1600, 1000)]
+        self.Color={"bg": "#282c34", "fg": "#abb2bf", }
+        self.Font={"zheng": "DejaVu Sans", "alpha": "Quicksand", 
+                   "drak": "Quicksand Medium","small": "Z003", 
+                   "beutful": "DejaVu Math TeX Gyre", "frmory": "Dingbats"}
+        self.Font_size={"small": 5, "mid": 10, "big": 20}
+    def init(self,):
+        self.bgfarme = tk.Frame(self.win)
+        self.lab_list=[]
+        self.but_list=[]
+        for i in range(self.LAB_Count):
+            self.lab_list.append(tk.Label(self.bgfarme))
+        for i in range(self.BUT_Count):
+            self.but_list.append(tk.Button(self.bgfarme))
     def geosize(self, tup=None):
         if tup:
             return str(tup[0][0])+"x"+str(tup[0][1])+"+"+str(tup[0][2])+"+"+str(tup[0][3])
         return str(self.Win_Size[0][0])+"x"+str(self.Win_Size[0][1])+"+"+str(self.Win_Size[0][2])+"+"+str(self.Win_Size[0][3])
-
-    def quickconfig(self, win):
-        '''you can call it use defalut config'''
-        self.init(win)
-
-        # self.bgfarme.destroy()
-    def First_Page(self, win):
-
-        pass
-
-    def Second_Page(self):
-        pass
-
-    def Third_Page(self):
-        pass
-
+    def clear(self):
+        for wed in self.bgfarme.winfo_children():
+            wed.pack_forget()
+            
+        '''self.bgfarme.destroy()
+        del self.bgfarme
+        del self.lab_list
+        del self.but_list
+        self.init()
+        self.quickconfig()'''
+    def go(self,go_fun,src_fun):
+        self.clear()
+        self.index+=1
+        self.func.append(src_fun)
+        go_fun()
+    def retu(self,):
+        if self.index<1:
+            return
+        self.clear()
+        self.index-=1
+        fun=self.func[self.index]
+        fun()
+        print("finsh!")
+        del self.func[self.index]
+      
+    def winconfig(self):
+        self.win.config(bg=self.Color["bg"],)
+        self.win.title("Sock QQ")
+        self.win.geometry(self.geosize())
+        self.win.resizable(0, 0)
+        self.bgfarme.config(background = self.Color["bg"], width = self.Win_Size[0][0], height = self.Win_Size[0][1])
+        self.bgfarme.pack()
+             # olny set once
+    def labconfig(self):
+        for lab in self.lab_list:
+            lab.config(anchor="nw", font=(self.Font["zheng"], self.Font_size["mid"]),
+                                  foreground=self.Color["fg"], background=self.Color["bg"], width=int(self.Win_Size[0][0]/self.Font_size["mid"]))
+    def butconfig(self):
+        for but in self.but_list:
+            but.config(font=(self.Font["zheng"], self.Font_size["mid"]),
+                       activebackground=self.Color["fg"], activeforeground=self.Color["bg"], foreground=self.Color["fg"], background=self.Color["bg"])
+    def quickconfig(self):
+        self.init()
+        self.winconfig()
+        self.labconfig()
+        self.butconfig()
+        
+    def run(self):
+        self.welcome1()
+        self.win.mainloop()
+    def welcome1(self):
+        self.lab_list[0].config(text="\nWelcome!", font=(self.Font["zheng"],20,"bold"))
+        self.lab_list[0].pack()
+        self.lab_list[1].config(text="\n\n一切刚刚好,现在立刻!\n\n",)
+        self.lab_list[1].pack()
+        self.but_list[0].config(text="Get Started",command=lambda :self.go(self.welcome2,self.welcome1))
+        self.but_list[0].pack(side='right')
+        print("call!")
+    def welcome2(self):
+        print("&")
+        self.but_list[1].config(text="return",command=self.retu())
+        self.but_list[1].pack()
+        #self.retu()
+       
+class Graphics(Welcome):
+    def __init__(self) -> None:
+        super().__init__()
 
 GNU = Graphics()
 
 
 def main(mess, sock, friends, gra):
     mess.Send(sock, "LOGIN "+USER_NAME)
-    r = th.Thread(target=mess.Read, args=(sock,))
-    r.setDaemon(True)
-    r.start()
+    for i in range(MAX_THD):
+        r = th.Thread(target=mess.Read, args=(sock,))
+        r.setDaemon(True)
+        r.start()
     sleep(1)
-    win = tk.Tk()
-    gra.quickconfig(win)
-    win.mainloop()
+    gra.quickconfig()
+    gra.run()
 
 
 main(UDP, UDP_SOCK, Friend_List, GNU)

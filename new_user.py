@@ -1,3 +1,4 @@
+from lib2to3.pygram import pattern_symbols
 import random
 from re import X
 import socket
@@ -190,7 +191,6 @@ class Spilt_Mess:
 class Welcome:
     LAB_Count=2
     BUT_Count=2
-    win=tk.Tk()
     def __init__(self) -> None:
         self.func=[]
         self.index=0
@@ -201,6 +201,7 @@ class Welcome:
                    "beutful": "DejaVu Math TeX Gyre", "frmory": "Dingbats"}
         self.Font_size={"small": 5, "mid": 10, "big": 20}
     def init(self,):
+        self.win=tk.Tk()
         self.bgfarme = tk.Frame(self.win)
         self.lab_list=[]
         self.but_list=[]
@@ -215,22 +216,20 @@ class Welcome:
     def clear(self):
         for wed in self.bgfarme.winfo_children():
             wed.pack_forget()
-            
-        '''self.bgfarme.destroy()
-        del self.bgfarme
-        del self.lab_list
-        del self.but_list
-        self.init()
-        self.quickconfig()'''
-    def go(self,go_fun,src_fun):
+                 
+    def go(self,go_fun,src_fun=None):
         self.clear()
-        self.index+=1
-        self.func.append(src_fun)
+        self.but_list[1].pack(anchor="nw")
+        if src_fun:
+            self.index+=1
+            self.func.append(src_fun)
         go_fun()
     def retu(self,):
         if self.index<1:
+            exit(0)
             return
         self.clear()
+        self.but_list[1].pack(anchor="nw")
         self.index-=1
         fun=self.func[self.index]
         fun()
@@ -257,10 +256,11 @@ class Welcome:
         self.init()
         self.winconfig()
         self.labconfig()
-        self.butconfig()
+        self.butconfig() 
+        self.but_list[1].config(text="return", command=lambda: self.retu())
         
     def run(self):
-        self.welcome1()
+        self.go(self.welcome1)
         self.win.mainloop()
     def welcome1(self):
         self.lab_list[0].config(text="\nWelcome!", font=(self.Font["zheng"],20,"bold"))
@@ -272,8 +272,9 @@ class Welcome:
         print("call!")
     def welcome2(self):
         print("&")
-        self.but_list[1].config(text="return",command=self.retu())
-        self.but_list[1].pack()
+        self.lab_list[0]
+        #self.win.update()
+        
         #self.retu()
        
 class Graphics(Welcome):
@@ -289,7 +290,6 @@ def main(mess, sock, friends, gra):
         r = th.Thread(target=mess.Read, args=(sock,))
         r.setDaemon(True)
         r.start()
-    sleep(1)
     gra.quickconfig()
     gra.run()
 

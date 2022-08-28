@@ -264,12 +264,12 @@ class Welcome:
         self.bgfarme.config(background = self.Color["bg"], width = self.Win_Size[0][0], height = self.Win_Size[0][1])
         self.bgfarme.pack()
              # olny set once
-    def labconfig(self):
-        for lab in self.lab_list:
+    def labconfig(self,lab_list):
+        for lab in lab_list:
             lab.config(anchor="nw", font=(self.Font["zheng"], self.Font_size["mid"]),
                                   foreground=self.Color["fg"], background=self.Color["bg"], width=int(self.Win_Size[0][0]/self.Font_size["mid"]))
-    def butconfig(self):
-        for but in self.but_list:
+    def butconfig(self,but_list):
+        for but in but_list:
             but.config(font=(self.Font["zheng"], self.Font_size["mid"]),
                        activebackground=self.Color["fg"], activeforeground=self.Color["bg"], foreground=self.Color["fg"], background=self.Color["bg"])
     def ent_config(self):
@@ -287,8 +287,8 @@ class Welcome:
         '''usally, user olny call it, can init and config all lab'''
         self.init()
         self.winconfig()
-        self.labconfig()
-        self.butconfig() 
+        self.labconfig(self.lab_list)
+        self.butconfig(self.but_list) 
         self.init_ent()
         self.ent_config()
         self.but_list[1].config(text="return", command=lambda: self.retu())
@@ -301,10 +301,9 @@ class Welcome:
             self.go(self.welcome1)
         else:
             USER_NAME=tmp[0]    
-            self.filename=tmp[1]
-            self.yes==1
-        if self.yes==1:
+            self.filename=tmp[1]      
             self.go(self.Login)
+        self.new()
         self.win.mainloop()
     def welcome1(self):
         self.lab_list[0].config(text="\nWelcome!", font=(self.Font["zheng"],20,"bold"))
@@ -345,6 +344,7 @@ class Welcome:
         file=open("name.txt","a")
         file.writelines([USER_NAME+"\n",self.filename])
         file.close()
+        #self.yes=1
     def setname(self):
         global USER_NAME
         USER_NAME=self.ent.get()
@@ -365,15 +365,45 @@ class Welcome:
         self.lab_list[1].config(width=self.pic_size[0],height=self.pic_size[1],image=self.furry)
         self.lab_list[1].pack()
         self.lab_list[2].pack()
-        
+    def new(self): 
+        '''this is Extended access''' 
+        pass
             
 class Friend_list(Welcome):
-    pass
-       
-class Graphics(Welcome,):
     def __init__(self) -> None:
         super().__init__()
-        
+
+    def init(self):
+        super().init()
+        self.friend_list = []
+
+    def quickconfig(self):
+        super().quickconfig()
+        self.butconfig(self.friend_list)
+
+    def new(self):
+        self.showfriends()
+        self.but_list[0].config(command=self.addfriend)
+        self.but_list[2].config(command=self.searchfriend)
+
+    def showfriends(self):
+        pass
+
+    def addfriend(self):
+        pass
+
+    def searchfriend(self):
+        pass
+
+       
+class Graphics(Friend_list):
+    def __init__(self) -> None:
+        Friend_list. __init__(self)
+        pass
+    
+class Talk_with(
+    
+):
 
 GNU = Graphics()
 

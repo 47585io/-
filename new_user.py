@@ -1,7 +1,5 @@
-from email.mime import image
-from lib2to3.pygram import pattern_symbols
+import os
 import random
-from re import X
 import socket
 import threading as th
 import atexit
@@ -9,6 +7,8 @@ from time import sleep
 import tkinter as tk
 import tkinter.filedialog as fid
 from tkinter import messagebox
+from PIL import Image
+import greenlet
 
 Mess_Buffer = 1024
 Max_Mess = 10
@@ -194,7 +194,6 @@ class Welcome:
     BUT_Count=3
     #lab and but init count
     def __init__(self) -> None:
-        self.yes=0
         self.func=[]
         self.index=0
         self.Win_Size=[(360, 450, 1600, 1000)]
@@ -205,6 +204,7 @@ class Welcome:
         self.Font_size={"small": 5, "mid": 10, "big": 20}
         self.pic_size=[100,90]
         self.filename=""
+        self.cache1=greenlet.greenlet(self.new)
     def init(self,):
         self.win=tk.Tk()
         self.bgfarme = tk.Frame(self.win)
@@ -244,10 +244,9 @@ class Welcome:
             self.func.append(src_fun)
         go_fun()
     def retu(self,):
-        '''pop a fun and call from func'''
+        '''pop and call a fun from func'''
         if self.index<1:
             exit(0)
-            return
         self.clear()
         self.but_list[1].pack(anchor="nw")
         self.index-=1
@@ -255,12 +254,12 @@ class Welcome:
         fun()
         print("finsh!")
         del self.func[self.index]
-      
+    
     def winconfig(self):
         self.win.config(bg=self.Color["bg"],)
         self.win.title("Sock QQ")
         self.win.geometry(self.geosize())
-        self.win.resizable(0, 0)
+        #self.win.resizable(0, 0)
         self.bgfarme.config(background = self.Color["bg"], width = self.Win_Size[0][0], height = self.Win_Size[0][1])
         self.bgfarme.pack()
              # olny set once
@@ -291,7 +290,7 @@ class Welcome:
         self.butconfig(self.but_list) 
         self.init_ent()
         self.ent_config()
-        self.but_list[1].config(text="return", command=lambda: self.retu())
+        self.but_list[1].config(text="←", command=lambda: self.retu())
         
     def run(self):
         '''when config all lab , call it'''
@@ -303,8 +302,10 @@ class Welcome:
             USER_NAME=tmp[0]    
             self.filename=tmp[1]      
             self.go(self.Login)
+        self.win.mainloop()
         self.new()
         self.win.mainloop()
+   
     def welcome1(self):
         self.lab_list[0].config(text="\nWelcome!", font=(self.Font["zheng"],20,"bold"))
         self.lab_list[0].pack()
@@ -320,9 +321,13 @@ class Welcome:
         self.lab_list[1].config(text="\n伟大的名字\n ")
         self.lab_list[1].pack()
         self.entfarme.pack()
+        self.lab_list[2].config(text="\n")
+        self.lab_list[2].pack()
         self.but_list[0].config(text="Enter", command=lambda: self.go(self.welcome3,self.welcome2,self.setname))
-        self.but_list[0].pack(side='right')        
+        self.but_list[0].pack(side='right') 
+        self.ent.bind("<Return>", lambda k,x=self.welcome3, y=self.welcome2, z=self.setname: self.go(x,y,z))
     def welcome3(self):
+        self.ent.unbind("<Return>")
         self.lab_list[0].config(text="\nChoose Avatar\n")
         self.lab_list[0].pack()
         self.lab_list[1].config(text="漂亮的头像\n")
@@ -333,18 +338,28 @@ class Welcome:
         self.but_list[0].config(command=self.choose,
                                 text='Choose', borderwidth=0,)
         self.but_list[0].pack(side='left',)
-        self.but_list[2].config(command=lambda :self.go(self.Login,None,self.save),text="Login")
+        self.but_list[2].config(command=lambda :self.go(self.Login,self.welcome3,self.save),text="Login")
         self.but_list[2].pack(side='right')
     #on, three welcome page is really, after, you must set a login func
     
     def choose(self,):
-        self.filename=fid.askopenfilename()
-        self.message.config(text=self.filename+"\n")
+        self.filename=fid.askopenfilename(initialdir="../",filetypes=[("PNG","*.png"), ("JPG","*.jpg"),("GIF","*.gif"),])
+        if self.filename!=():
+            self.message.config(text=self.filename+"\n")
     def save(self):
-        file=open("name.txt","a")
+        if self.filename==():
+            return
+        if self.filename.find(".jpg"):
+            newfile=Image.open(self.filename,"r")
+            newfile.thumbnail((300,700))
+            newfile.convert("RGBA")
+            mk=os.path.abspath("./")
+            newfile.save(mk+"/new.png")
+            self.filename=mk+"/new.png"
+            print("save in ", mk+"/new.png")
+        file=open("name.txt","w")
         file.writelines([USER_NAME+"\n",self.filename])
         file.close()
-        #self.yes=1
     def setname(self):
         global USER_NAME
         USER_NAME=self.ent.get()
@@ -356,56 +371,79 @@ class Welcome:
             return 0
         else:
             return tmp
-    
+
     def Login(self): 
         global USER_NAME       
-        self.lab_list[0].config(text='\n\nwelcom! '+USER_NAME+"\n",anchor='center')
+        self.lab_list[0].config(text='\nHello!\n',anchor='center',font=(self.Font["zheng"],self.Font_size["big"],"bold"))
         self.lab_list[0].pack()
+        self.message.config(text=USER_NAME, anchor="nw", font=(self.Font["zheng"], self.Font_size["mid"]),
+                            foreground=self.Color["fg"], background=self.Color["bg"], width=self.Win_Size[0][0]-20)
+        
         self.furry=tk.PhotoImage(file=self.filename)
         self.lab_list[1].config(width=self.pic_size[0],height=self.pic_size[1],image=self.furry)
         self.lab_list[1].pack()
         self.lab_list[2].pack()
+        self.message.pack()
+        self.win.update()
+        sleep(2)
+        self.cache1.switch()
     def new(self): 
         '''this is Extended access''' 
         pass
-            
+
+#the class can't to new class!!!!
+#or, try lab?
+#no! it not have scro!
+#but we must 继承 baseclass, 否则 all lab going to del
+#why?.... why not?
+
 class Friend_list(Welcome):
     def __init__(self) -> None:
-        super().__init__()
-
+        Welcome.__init__(self)
     def init(self):
-        super().init()
-        self.friend_list = []
-
+        Welcome.init(self)
+        self.canv_init()
+    def canv_init(self,):
+        self.f_can = tk.Canvas(self.bgfarme,background=self.Color['bg'],borderwidth=0)
+        self.f_scro = tk.Scrollbar(self.bgfarme)
+    def canvconfig(self,canv,scro):
+        canv.config(width=self.Win_Size[0][0],height=self.Win_Size[0][1], yscrollcommand=scro.set,)
+        scro.config(command=canv.yview)
     def quickconfig(self):
-        super().quickconfig()
-        self.butconfig(self.friend_list)
-
-    def new(self):
-        self.showfriends()
-        self.but_list[0].config(command=self.addfriend)
-        self.but_list[2].config(command=self.searchfriend)
-
-    def showfriends(self):
+        Welcome.quickconfig(self)
+        self.canvconfig(self.f_can,self.f_scro)
+        
+    def new(self):       
+        self.go(self.showfriends)
+        #self.but_list[2].config(command=self.searchfriend)       
         pass
-
+    def place_forgets(*arg):
+        '''it going to place_forget all arg as mid fun'''
+        pass
+    def showfriends(self):
+        self.but_list[0].config(text="+")
+        self.but_list[0].place(x=self.Win_Size[0][0]-45,y=0)
+        self.f_scro.pack(fill=tk.Y, side='right')
+        self.f_can.pack()
+        self.f_can.create_rectangle(0,0,100,100,fill="blue")
+        self.f_can.pack()
+        print("he")
     def addfriend(self):
         pass
-
     def searchfriend(self):
         pass
 
        
 class Graphics(Friend_list):
     def __init__(self) -> None:
-        Friend_list. __init__(self)
+        Friend_list.__init__(self)
         pass
     
-class Talk_with(
     
-):
+class Talk_with:
+    pass
 
-GNU = Graphics()
+GNU = Friend_list()
 
 
 def main(mess, sock, friends, gra):

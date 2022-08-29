@@ -92,7 +92,7 @@ class friends:
     '''The all friend save in'''
 
     def __init__(self) -> None:
-        self.friend_list = ["qe"]
+        self.friend_list = ["qe","he"]
         # friend name list
         self.Mess_Friend = {}
         # 记录与好友通信mess label

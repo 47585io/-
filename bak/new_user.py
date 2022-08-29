@@ -434,13 +434,12 @@ class Friend_list(Welcome):
         self.Canv_x = 0   #50
         self.Canv_y = 0   #45
         self.Canv_x_from = 20
-        self.Canv_size = (self.Win_Size[0][0], self.pic_size[1])     
-        
+        self.Canv_size = (self.Win_Size[0][0], self.pic_size[1])
+        self.furry_l = []
+
     def init(self,):
         Welcome.init(self)
         self.canv_init()
-        self.furry_l = []
-        self.tag_list=[]
 
     def canv_init(self,):
         self.f_can = tk.Canvas(self.bgfarme, highlightthickness=0, scrollregion=(
@@ -452,7 +451,7 @@ class Friend_list(Welcome):
                     [1], borderwidth=0, yscrollcommand=scro.set,)
         scro.config(command=canv.yview, background=self.Color['fg'],
                     activebackground=self.Color["entblock"], borderwidth=0, elementborderwidth=0, activerelief="sunken")
-        
+
     def quickconfig(self, friends):
         Welcome.quickconfig(self)
         self.canvconfig(self.f_can, self.f_scro)
@@ -462,24 +461,24 @@ class Friend_list(Welcome):
         self.go(self.showfriends)
         pass
 
-    def place_forgets(self,*arg):
+    def place_forgets(*arg):
         '''it going to place_forget all arg as mid fun before pack_forget'''
         for a in arg:
-            a.place_forget()
+            a.place_forgets()
+        pass
 
     def draw_a_friend(self, canv, name,pic,relapos,namepos,picpos):
-        tag=canv.create_rectangle(relapos[0],relapos[1],relapos[2],relapos[3],activefill=self.Color['ffg'], outline=self.Color['bg'],width=0)
+        canv.create_rectangle(relapos[0],relapos[1],relapos[2],relapos[3],activefill=self.Color['ffg'], outline=self.Color['bg'],width=0)
         canv.create_image(picpos[0],picpos[1],image=pic,)
         canv.create_text(namepos[0],namepos[1],
          text=name, fill=self.Color['fg'],font=(self.Font["zheng"],self.Font_size["mid"]))
-        self.f_can.tag_bind(tag,'<Button-1>',self.talk_with_mid)
-        self.tag_list.append(tag)
+
     def showfriends(self):
         self.but_list[0].config(text="+", command=self.addfriend)
         self.but_list[0].place(x=self.Win_Size[0][0]-40, y=0)
         self.f_scro.pack(fill=tk.Y, side='right')
         self.f_can.pack()
-    # but_list[0] is place!!!
+    # but_list[0]  
         
         if self.fren.pic==[]:
             self.f_can.create_text(self.Win_Size[0][0]//2,self.Win_Size[0][1]//2-50,fill=self.Color['fg'],font=(self.Font["zheng"],self.Font_size["big"],"bold"),text="No Friends!")           
@@ -487,8 +486,6 @@ class Friend_list(Welcome):
         count=len(self.furry_l)
         while count < len(self.fren.pic):
             self.furry_l.append(tk.PhotoImage(file=self.fren.pic[count],width=self.pic_size[0],height=self.pic_size[1]))
-            count+=1
-        for count in range(len(self.furry_l)):
             if count%2==0:
                 self.draw_a_friend(
                     self.f_can, self.fren.friend_list[count], self.furry_l[count], (self.Canv_x, self.Canv_y, self.Win_Size[0][0], self.Canv_y+self.pic_size[1],), (self.Canv_x+self.pic_size[0]+self.Canv_x_from, self.Canv_y+self.pic_size[1]//2,), (self.Canv_x+50, self.Canv_y+45,))
@@ -505,23 +502,7 @@ class Friend_list(Welcome):
 
     def searchfriend(self):
         pass
-    def clear_Canv(self,):
-        self.f_can.delete(tk.ALL)
-        self.index=0
-        self.tag_list.clear()
-        self.Canv_y=0
-        self.furry_l.clear()
-    def talk_with_mid(self,event):
-        print(event.widget,event.x,event.y)
-        tup=self.f_can.find_closest(event.x, event.y)
-        index=self.tag_list.index(tup[0])
-        name=self.fren.friend_list[index]
-        self.clear_Canv()
-        self.go(lambda :self.talk_with(name),self.showfriends,lambda :self.place_forgets(self.but_list[0]))
-        
-    def talk_with(self,name):
-        print(name)
-    #please redefine after
+
 
 class Graphics(Friend_list):
     def __init__(self) -> None:

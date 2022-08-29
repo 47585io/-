@@ -10,6 +10,7 @@ import tkinter.filedialog as fid
 from tkinter import messagebox
 from PIL import Image
 import greenlet
+from concurrent.futures import ThreadPoolExecutor as Th
 
 Mess_Buffer = 1024
 Max_Mess = 10
@@ -119,7 +120,7 @@ class friends:
         s_str = mess.getnew()
         return Spilt_Mess.Friend_list_Read_Spilt(s_str)
 
-    def addfriend(self, mess, sock):
+    def addfriend(self, mess=UDP, sock=UDP_SOCK):
         '''get friend list and show'''
         list_ = self.__from_server_get_friend_list(mess, sock)
         list_ = self.format_list(list_)
@@ -132,7 +133,7 @@ class friends:
         while i < len(self.friend_list):
             if self.friend_list[i].find(name_str) != -1:
                 name_list.append(i)
-
+        return name_list
 
 Friend_List = friends()
 # sava all friend
@@ -435,6 +436,7 @@ class Friend_list(Welcome):
         self.Canv_y = 0   #45
         self.Canv_x_from = 20
         self.Canv_size = (self.Win_Size[0][0], self.pic_size[1])     
+        self.t=Th(2)
         
     def init(self,):
         Welcome.init(self)
@@ -443,6 +445,7 @@ class Friend_list(Welcome):
         self.tag_list=[]
 
     def canv_init(self,):
+        
         self.f_can = tk.Canvas(self.bgfarme, highlightthickness=0, scrollregion=(
             0, 0, 500, 1000), confine=False, background=self.Color['bg'],selectbackground=self.Color['ffg'] ,selectforeground='white',borderwidth=0,)
         self.f_scro = tk.Scrollbar(self.bgfarme)
@@ -475,7 +478,7 @@ class Friend_list(Welcome):
         self.f_can.tag_bind(tag,'<Button-1>',self.talk_with_mid)
         self.tag_list.append(tag)
     def showfriends(self):
-        self.but_list[0].config(text="+", command=self.addfriend)
+        self.but_list[0].config(text="+", command=self.addfriend_mid)
         self.but_list[0].place(x=self.Win_Size[0][0]-40, y=0)
         self.f_scro.pack(fill=tk.Y, side='right')
         self.f_can.pack()
@@ -498,12 +501,20 @@ class Friend_list(Welcome):
             count+=1
             self.Canv_y+=self.pic_size[1]
             print(self.Canv_x)
-        
+    
+    def addfriend_mid(self):
+        self.clear_Canv()
+        self.go(self.addfriend,self.showfriends,lambda :self.place_forgets(self.but_list[0]))
+             
     def addfriend(self):
-
-        pass
-
-    def searchfriend(self):
+        self.entfarme.pack()
+        self.f_scro.pack(side='right',fill=tk.Y)
+        self.f_can.pack()
+        self.t.submit(self.search,)
+        
+    def search(self):
+        self.fren.addfriend()  
+        print(self.fren.Search_Friend(self.ent.get()))
         pass
     def clear_Canv(self,):
         self.f_can.delete(tk.ALL)

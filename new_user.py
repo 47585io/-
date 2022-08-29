@@ -92,7 +92,7 @@ class friends:
     '''The all friend save in'''
 
     def __init__(self) -> None:
-        self.friend_list = []
+        self.friend_list = ["qe"]
         # friend name list
         self.Mess_Friend = {}
         # 记录与好友通信mess label
@@ -197,7 +197,7 @@ class Welcome:
         self.func=[]
         self.index=0
         self.Win_Size=[(360, 450, 1600, 1000)]
-        self.Color={"bg": "#282c34", "fg": "#abb2bf","entblock":"#808080", }
+        self.Color={"bg": "#282c34", "fg": "#abb2bf","entblock":"#808080","ffg":"#484848" }
         self.Font={"zheng": "DejaVu Sans", "alpha": "Quicksand", 
                    "drak": "Quicksand Medium","small": "Z003", 
                    "beutful": "DejaVu Math TeX Gyre", "frmory": "Dingbats"}
@@ -266,15 +266,15 @@ class Welcome:
     def labconfig(self,lab_list):
         for lab in lab_list:
             lab.config(anchor="nw", font=(self.Font["zheng"], self.Font_size["mid"]),
-                                  foreground=self.Color["fg"], background=self.Color["bg"], width=int(self.Win_Size[0][0]/self.Font_size["mid"]))
+                                  borderwidth=0,foreground=self.Color["fg"], background=self.Color["bg"], width=int(self.Win_Size[0][0]/self.Font_size["mid"]))
     def butconfig(self,but_list):
         for but in but_list:
             but.config(font=(self.Font["zheng"], self.Font_size["mid"]),
-                       activebackground=self.Color["fg"], activeforeground=self.Color["bg"], foreground=self.Color["fg"], background=self.Color["bg"])
+                       borderwidth=0,highlightthickness=0, activebackground=self.Color["ffg"],  foreground=self.Color["fg"],activeforeground=self.Color["fg"], background=self.Color["bg"])
     def ent_config(self):
         self.entfarme.config(background=self.Color['bg'],)
-        self.ent_scro.config(command=self.ent.xview,background=self.Color['fg'],
-                             activebackground=self.Color["entblock"],borderwidth=0,orient=tk.HORIZONTAL,elementborderwidth=0,activerelief="sunken")       
+        self.ent_scro.config(command=self.ent.xview, background=self.Color['fg'],
+                             activebackground=self.Color["entblock"], borderwidth=0, orient=tk.HORIZONTAL, elementborderwidth=0, activerelief="sunken")
         self.ent.config(xscrollcommand=self.ent_scro.set, borderwidth=1, highlightbackground=self.Color['fg'],
                         highlightcolor=self.Color['fg'],
                         highlightthickness=1, insertbackground='#61afef',
@@ -400,35 +400,53 @@ class Welcome:
 class Friend_list(Welcome):
     def __init__(self) -> None:
         Welcome.__init__(self)
-    def init(self):
+        self.Canv_x=self.Font_size["mid"]
+        self.Canv_y_from=20
+        self.Canv_size=(self.Win_Size[0][0],self.pic_size[1])
+        self.furry=[]
+    def init(self,):
         Welcome.init(self)
         self.canv_init()
     def canv_init(self,):
-        self.f_can = tk.Canvas(self.bgfarme,background=self.Color['bg'],borderwidth=0)
+        self.f_can = tk.Canvas(self.bgfarme,highlightthickness=0, background=self.Color['bg'],borderwidth=0,)
         self.f_scro = tk.Scrollbar(self.bgfarme)
     def canvconfig(self,canv,scro):
-        canv.config(width=self.Win_Size[0][0],height=self.Win_Size[0][1], yscrollcommand=scro.set,)
-        scro.config(command=canv.yview)
-    def quickconfig(self):
+        canv.config(width=self.Win_Size[0][0], height=self.Win_Size[0]
+                    [1], borderwidth=0, yscrollcommand=scro.set,)
+        scro.config(command=canv.yview,background=self.Color['fg'],
+                             activebackground=self.Color["entblock"],borderwidth=0,elementborderwidth=0,activerelief="sunken")     
+    def quickconfig(self,friends):
         Welcome.quickconfig(self)
         self.canvconfig(self.f_can,self.f_scro)
-        
+        self.fren = friends
     def new(self):       
         self.go(self.showfriends)
-        #self.but_list[2].config(command=self.searchfriend)       
+        self.but_list[2].config(command=self.searchfriend)       
         pass
     def place_forgets(*arg):
-        '''it going to place_forget all arg as mid fun'''
+        '''it going to place_forget all arg as mid fun before pack_forget'''
+        for a in arg:
+            a.place_forgets()
+        pass
+    
+    def draw_a_friend(self,canv,name):
+        canv.create_rectangle(
+            0, self.Canv_x, self.Canv_size[0], self.Canv_x+self.Canv_size[1], activefill=self.Color['ffg'], outline=self.Color['bg'])
+        canv.create_text(20, self.Canv_x,text=name,fill=self.Color['fg'],)
+        self.Canv_x += self.Canv_size[1]
         pass
     def showfriends(self):
-        self.but_list[0].config(text="+")
-        self.but_list[0].place(x=self.Win_Size[0][0]-45,y=0)
+        self.but_list[0].config(text="+",command=self.addfriend)
+        self.but_list[0].place(x=self.Win_Size[0][0]-40,y=0)
+        #self.lab_list[1].pack()
         self.f_scro.pack(fill=tk.Y, side='right')
         self.f_can.pack()
-        self.f_can.create_rectangle(0,0,100,100,fill="blue")
-        self.f_can.pack()
-        print("he")
+    #but_list[0]
+        for f in self.fren.friend_list:
+            self.draw_a_friend(self.f_can,f)
+        #print("he")
     def addfriend(self):
+        
         pass
     def searchfriend(self):
         pass
@@ -452,7 +470,7 @@ def main(mess, sock, friends, gra):
         r = th.Thread(target=mess.Read, args=(sock,))
         r.setDaemon(True)
         r.start()
-    gra.quickconfig()
+    gra.quickconfig(friends)
     gra.run()
 
 

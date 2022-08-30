@@ -1,4 +1,5 @@
 from copy import deepcopy
+from inspect import isabstract
 import os
 import random
 import socket
@@ -20,11 +21,12 @@ UDP_SOCK.bind(("", 0))
 TCP_SOCK = socket.socket()
 TCP_SOCK.bind(("", 0))
 # the user, olny two port with server
-USER_NAME = ""
-Is_Loding=1
-#...
-MAX_THD=1
-#the user can use every work max thread
+USER_NAME = "cat"
+Is_Loding = 1
+# ...
+MAX_THD = 1
+# the user can use every work max thread
+
 
 def whenexit():
     '''when exit, close all sock'''
@@ -55,6 +57,7 @@ class UDP_Mess:
             del self.MessCache[0]
             self.index -= 1
             return mess
+        return
 
     def getnew(self):
         '''get best new mess'''
@@ -75,6 +78,7 @@ class UDP_Mess:
 
     def Read(self, sock):
         '''every once, recv a mess and add it to MessCache, if mess count >Max, del old mess'''
+        global USER_NAME
         while 1:
             tmp = sock.recvfrom(1024)
             self.MessCache.append(tmp[0])
@@ -83,7 +87,7 @@ class UDP_Mess:
             if(self.index >= Max_Mess):
                 del self.MessCache[0]
                 self.index -= 1
-            print(tmp[0])
+            print("i am ",USER_NAME,"a new mess: ",tmp[0],"\n")
 
 
 UDP = UDP_Mess()
@@ -94,14 +98,15 @@ class friends:
     '''The all friend save in'''
 
     def __init__(self) -> None:
-        self.friend_list = ["qe","he"]
+        self.friend_list = ["my shadow", "my computer",]
         # friend name list
         self.pic = ['/home/tom/vscode/github/--1/new.png',
                     '/home/tom/vscode/github/--1/furry.gif']
         self.Mess_Friend = {}
         # 记录与好友通信mess label
-        self.Talk_With = []
+        self.talk_with = []
         # who talk with now
+        self.tmp = []
 
     def show(self):
         return self.friend_list
@@ -110,7 +115,7 @@ class friends:
         '''format the going to add list'''
         new_list = []
         for name in list_:
-            if name not in self.friend_list and name != USER_NAME:
+            if name not in self.friend_list:
                 new_list.append(name)
         return new_list
 
@@ -124,22 +129,26 @@ class friends:
         '''get friend list and show'''
         list_ = self.__from_server_get_friend_list(mess, sock)
         list_ = self.format_list(list_)
-        self.friend_list.extend(list_)
+        self.tmp.extend(list_)
 
     def Search_Friend(self, name_str):
         '''search name_str in friend_list'''
+        if not name_str:
+            #print("no name")
+            return
         name_list = []
-        i = 0
-        while i < len(self.friend_list):
-            if self.friend_list[i].find(name_str) != -1:
+        for i in self.tmp:
+            if i.find(name_str) != -1:
                 name_list.append(i)
         return name_list
+
 
 Friend_List = friends()
 # sava all friend
 
 
 class Spilt_Mess:
+    '''i have a many spilt str func'''
     @staticmethod
     def Send_spilt(s_str, name):
         if name:
@@ -195,6 +204,7 @@ class Spilt_Mess:
 
 
 class Welcome:
+    '''the welcom class, can show welcome page and switch page'''
     LAB_Count = 3
     BUT_Count = 3
     # lab and but init count
@@ -216,7 +226,6 @@ class Welcome:
     def init(self,):
         self.win = tk.Tk()
         self.bgfarme = tk.Frame(self.win)
-
         self.lab_list = []
         self.but_list = []
         self.message = tk.Message(self.bgfarme)
@@ -264,7 +273,7 @@ class Welcome:
         self.index -= 1
         fun = self.func[self.index]
         fun()
-        print("finsh!")
+        #print("finsh!")
         del self.func[self.index]
 
     def winconfig(self):
@@ -299,8 +308,10 @@ class Welcome:
         self.ent_scro.pack(side="bottom", fill=tk.X)
 # please wirte all config fun on
 
-    def quickconfig(self):
+    def quickconfig(self,mess,sock):
         '''usally, user olny call it, can init and config all lab'''
+        self.sock=sock
+        self.mess=mess
         self.init()
         self.winconfig()
         self.labconfig(self.lab_list)
@@ -316,7 +327,7 @@ class Welcome:
         if self.openfile() == 0:
             self.go(self.welcome1)
         else:
-            USER_NAME = tmp[0]
+            USER_NAME = tmp[0][0:-1:]
             self.filename = tmp[1]
             self.go(self.Login)
         self.win.mainloop()
@@ -332,10 +343,10 @@ class Welcome:
         self.but_list[0].config(
             text="Get Started", command=lambda: self.go(self.welcome2, self.welcome1))
         self.but_list[0].pack(side='right')
-        print("call!")
+        #print("call!")
 
     def welcome2(self):
-        print("&")
+        #print("&")
         self.lab_list[0].config(text='\nSet Name',)
         self.lab_list[0].pack()
         self.lab_list[1].config(text="\n伟大的名字\n ")
@@ -364,15 +375,17 @@ class Welcome:
         self.but_list[2].config(command=lambda: self.go(
             self.Login, self.welcome3, self.save), text="Login")
         self.but_list[2].pack(side='right')
-    # on, three welcome page is really, after, you must set a login func
+    #on, three welcome page is really, after, you must set a login func
 
     def choose(self,):
+        '''open file chooser'''
         self.filename = fid.askopenfilename(
             initialdir="../", filetypes=[("PNG", "*.png"), ("JPG", "*.jpg"), ("GIF", "*.gif"), ])
         if self.filename != ():
             self.message.config(text=self.filename+"\n")
 
     def save(self):
+        '''save user choose picture'''
         if self.filename == ():
             return
         if self.filename.find(".jpg"):
@@ -393,6 +406,7 @@ class Welcome:
         print("hello", USER_NAME)
 
     def openfile(self):
+        '''check a can use file'''
         file = open("name.txt", "r+")
         tmp = file.readlines()
         if tmp == []:
@@ -401,6 +415,7 @@ class Welcome:
             return tmp
 
     def Login(self):
+        '''after login, going to show friends'''
         global USER_NAME
         self.lab_list[0].config(text='\nHello!\n', anchor='center', font=(
             self.Font["zheng"], self.Font_size["big"], "bold"))
@@ -415,8 +430,14 @@ class Welcome:
         self.lab_list[2].pack()
         self.message.pack()
         self.win.update()
+        self.mess.Send(self.sock, "LOGIN "+USER_NAME)
+        for i in range(MAX_THD):
+            r = th.Thread(target=self.mess.Read, args=(self.sock,))
+            r.setDaemon(True)
+            r.start()
         sleep(2)
         self.cache1.switch()
+        #jump to show
 
     def new(self):
         '''this is Extended access'''
@@ -430,130 +451,216 @@ class Welcome:
 
 
 class Friend_list(Welcome):
+    '''the friend_list class, can show your friend_list and add new friend'''
     def __init__(self) -> None:
         Welcome.__init__(self)
-        self.Canv_x = 0   #50
-        self.Canv_y = 0   #45
-        self.Canv_x_from = 20
-        self.Canv_size = (self.Win_Size[0][0], self.pic_size[1])     
-        self.t=Th(2)
-        
+        self.Canv_x = 0  # 50
+        self.Canv_y = 0  # 45
+        self.Canv_x_from = 70
+        self.Canv_size = (self.Win_Size[0][0], self.pic_size[1])
+        self.s = th.Thread(target=self.search,)
+        self.s.setDaemon(True)
+        self.isstart=0
     def init(self,):
+        '''redefine func'''
         Welcome.init(self)
         self.canv_init()
         self.furry_l = []
-        self.tag_list=[]
+        self.tag_list = []
+        self.List = tk.Listbox(self.bgfarme, background=self.Color['bg'], selectbackground=self.Color['ffg'],
+                               foreground=self.Color['fg'], selectforeground=self.Color['fg'], borderwidth=0, highlightthickness=0)
 
     def canv_init(self,):
-        
+        '''init canv and scro'''
         self.f_can = tk.Canvas(self.bgfarme, highlightthickness=0, scrollregion=(
-            0, 0, 500, 1000), confine=False, background=self.Color['bg'],selectbackground=self.Color['ffg'] ,selectforeground='white',borderwidth=0,)
+            0, 0, 500, 1000), confine=False, background=self.Color['bg'], selectbackground=self.Color['ffg'], selectforeground='white', borderwidth=0,)
         self.f_scro = tk.Scrollbar(self.bgfarme)
 
     def canvconfig(self, canv, scro):
+        '''config a Canv with Theme'''
         canv.config(width=self.Win_Size[0][0], height=self.Win_Size[0]
                     [1], borderwidth=0, yscrollcommand=scro.set,)
         scro.config(command=canv.yview, background=self.Color['fg'],
                     activebackground=self.Color["entblock"], borderwidth=0, elementborderwidth=0, activerelief="sunken")
-        
-    def quickconfig(self, friends):
-        Welcome.quickconfig(self)
+
+    def quickconfig(self, friends,sock,mess):
+        '''redefine func'''
+        Welcome.quickconfig(self,mess,sock)
         self.canvconfig(self.f_can, self.f_scro)
         self.fren = friends
 
     def new(self):
+        '''redefine last class func, go to show friends'''
         self.go(self.showfriends)
         pass
 
-    def place_forgets(self,*arg):
+    def place_forgets(self, *arg):
         '''it going to place_forget all arg as mid fun before pack_forget'''
         for a in arg:
             a.place_forget()
 
-    def draw_a_friend(self, canv, name,pic,relapos,namepos,picpos):
-        tag=canv.create_rectangle(relapos[0],relapos[1],relapos[2],relapos[3],activefill=self.Color['ffg'], outline=self.Color['bg'],width=0)
-        canv.create_image(picpos[0],picpos[1],image=pic,)
-        canv.create_text(namepos[0],namepos[1],
-         text=name, fill=self.Color['fg'],font=(self.Font["zheng"],self.Font_size["mid"]))
-        self.f_can.tag_bind(tag,'<Button-1>',self.talk_with_mid)
+    def draw_a_friend(self, canv, name, pic, relapos, namepos, picpos,func):
+        '''draw a friend mess'''
+        tag = canv.create_rectangle(relapos[0], relapos[1], relapos[2], relapos[3],
+                                    activefill=self.Color['ffg'], outline=self.Color['bg'], width=0)
+        if canv:   
+            canv.create_image(picpos[0], picpos[1], image=pic,)
+        canv.create_text(namepos[0], namepos[1],
+                         text=name, fill=self.Color['fg'], font=(self.Font["zheng"], self.Font_size["mid"]))
+        self.f_can.tag_bind(tag, '<Button-1>',func)
         self.tag_list.append(tag)
+
     def showfriends(self):
         self.but_list[0].config(text="+", command=self.addfriend_mid)
         self.but_list[0].place(x=self.Win_Size[0][0]-40, y=0)
         self.f_scro.pack(fill=tk.Y, side='right')
         self.f_can.pack()
     # but_list[0] is place!!!
-        
-        if self.fren.pic==[]:
-            self.f_can.create_text(self.Win_Size[0][0]//2,self.Win_Size[0][1]//2-50,fill=self.Color['fg'],font=(self.Font["zheng"],self.Font_size["big"],"bold"),text="No Friends!")           
-       
-        count=len(self.furry_l)
-        while count < len(self.fren.pic):
-            self.furry_l.append(tk.PhotoImage(file=self.fren.pic[count],width=self.pic_size[0],height=self.pic_size[1]))
-            count+=1
-        for count in range(len(self.furry_l)):
-            if count%2==0:
-                self.draw_a_friend(
-                    self.f_can, self.fren.friend_list[count], self.furry_l[count], (self.Canv_x, self.Canv_y, self.Win_Size[0][0], self.Canv_y+self.pic_size[1],), (self.Canv_x+self.pic_size[0]+self.Canv_x_from, self.Canv_y+self.pic_size[1]//2,), (self.Canv_x+50, self.Canv_y+45,))
-            if count%2==1:
-                self.draw_a_friend(
-                    self.f_can, self.fren.friend_list[count], self.furry_l[count], (self.Canv_x, self.Canv_y, self.Win_Size[0][0], self.Canv_y+self.pic_size[1],), (self.Win_Size[0][0]-self.pic_size[0]-self.Canv_x_from, self.Canv_y+self.pic_size[1]//2,), (self.Win_Size[0][0]-self.pic_size[0]+50, self.Canv_y+45,))
-            count+=1
-            self.Canv_y+=self.pic_size[1]
-            print(self.Canv_x)
-    
-    def addfriend_mid(self):
-        self.clear_Canv()
-        self.go(self.addfriend,self.showfriends,lambda :self.place_forgets(self.but_list[0]))
-             
-    def addfriend(self):
-        self.entfarme.pack()
-        self.f_scro.pack(side='right',fill=tk.Y)
-        self.f_can.pack()
-        self.t.submit(self.search,)
-        
-    def search(self):
-        self.fren.addfriend()  
-        print(self.fren.Search_Friend(self.ent.get()))
-        pass
-    def clear_Canv(self,):
-        self.f_can.delete(tk.ALL)
-        self.index=0
-        self.tag_list.clear()
-        self.Canv_y=0
-        self.furry_l.clear()
-    def talk_with_mid(self,event):
-        print(event.widget,event.x,event.y)
-        tup=self.f_can.find_closest(event.x, event.y)
-        index=self.tag_list.index(tup[0])
-        name=self.fren.friend_list[index]
-        self.clear_Canv()
-        self.go(lambda :self.talk_with(name),self.showfriends,lambda :self.place_forgets(self.but_list[0]))
-        
-    def talk_with(self,name):
-        print(name)
-    #please redefine after
 
-class Graphics(Friend_list):
+        if self.fren.pic == []:
+            self.f_can.create_text(self.Win_Size[0][0]//2, self.Win_Size[0][1]//2-50, fill=self.Color['fg'], font=(
+                self.Font["zheng"], self.Font_size["big"], "bold"), text="No Friends!")
+
+        count = len(self.furry_l)
+        while count < len(self.fren.show()):
+            if count>=len(self.fren.pic):
+                self.furry_l.append(tk.PhotoImage(
+                    file="default.png", width=self.pic_size[0], height=self.pic_size[1]))
+            else:
+                self.furry_l.append(tk.PhotoImage(
+                file=self.fren.pic[count], width=self.pic_size[0], height=self.pic_size[1]))
+            count += 1
+        for count in range(len(self.furry_l)):
+            if count % 2 == 0:
+                self.draw_a_friend(
+                    self.f_can, self.fren.friend_list[count], self.furry_l[count], (self.Canv_x, self.Canv_y, self.Win_Size[0][0], self.Canv_y+self.pic_size[1],), (self.Canv_x+self.pic_size[0]+self.Canv_x_from, self.Canv_y+self.pic_size[1]//2,), (self.Canv_x+50, self.Canv_y+45,),self.talk_with_mid)
+            if count % 2 == 1:
+                self.draw_a_friend(
+                    self.f_can, self.fren.friend_list[count], self.furry_l[count], (self.Canv_x, self.Canv_y, self.Win_Size[0][0], self.Canv_y+self.pic_size[1],), (self.Win_Size[0][0]-self.pic_size[0]-self.Canv_x_from, self.Canv_y+self.pic_size[1]//2,), (self.Win_Size[0][0]-self.pic_size[0]+50, self.Canv_y+45,),self.talk_with_mid)
+            count += 1
+            self.Canv_y += self.pic_size[1]
+            #print(self.Canv_x)
+
+    def addfriend_mid(self):
+        '''clear Canv and go to add friend'''
+        self.clear_Canv()
+        self.go(self.addfriend, self.showfriends,
+                lambda: self.place_forgets(self.but_list[0]))
+
+    def addfriend(self):
+        '''config a addfriend page'''
+        self.entfarme.pack()
+        self.List.pack()
+        self.but_list[2].pack(side='right')
+        self.but_list[2].config(text='Ok', font=(self.Font["zheng"], self.Font_size['mid']+3,),command=self.addmany)
+        self.fren.addfriend()
+        if self.isstart==0:
+            self.isstart+=1
+            self.s.start()
+            
+    def search(self):
+        '''search user input str in friend_list'''
+        tmp = ""
+        while 1:
+            if tmp == self.ent.get():
+                continue
+            tmp = self.ent.get()
+            if not tmp:
+                self.List.delete(0, "end")
+            list = self.fren.Search_Friend(self.ent.get())
+            if list:
+                self.List.delete(0, "end")
+                for l in list:
+                    self.List.insert("end", l)
+            else:
+                self.List.delete(0, "end")
+    def addmany(self):
+        '''user going to add friend'''
+        try:
+            tup = self.List.get(self.List.curselection())
+            self.fren.friend_list.append(tup)
+        except Exception:
+            pass
+    def clear_Canv(self,):
+        '''clear Canv on old page'''
+        self.f_can.delete(tk.ALL)
+        self.index = 0
+        self.tag_list.clear()
+        self.Canv_y = 0
+        #self.furry_l.clear()
+
+    def talk_with_mid(self, event):
+        '''user choose which friend'''
+        #print(event.widget, event.x, event.y)
+        tup = self.f_can.find_closest(event.x, event.y)
+        index = self.tag_list.index(tup[0])
+        name = self.fren.friend_list[index]
+        self.clear_Canv()
+        self.go(lambda: self.talk_with(name), self.showfriends,
+                lambda: self.place_forgets(self.but_list[0]))
+
+    def talk_with(self, name):
+        print(name)
+    # please redefine after
+
+class Talk_with(Friend_list):
+    '''the talk_with class, can talk with your friens or grounp, and send or get file'''
     def __init__(self) -> None:
         Friend_list.__init__(self)
+        self.talk=th.Thread(target=self.Readshow,)
+        self.talk.setDaemon(True)
+        self.istalk=0
+    def init(self):
+        Friend_list.init(self)
+    def quickconfig(self,friends,mess,sock):
+        Friend_list.quickconfig(self,friends,sock,mess)
+        #self.mess=mess
+        #self.sock=sock
+    def talk_with(self, name):
+        if self.istalk==0:
+            self.talk.start()
+            self.istalk+=1
+        #self.but_list[1].config(command=self.endretu)
+        self.fren.talk_with=name
+        self.f_can.pack()
+        self.entfarme.pack(side='left',anchor='nw')
+        self.but_list[2].config(text='send',command=lambda :self.Sendshow(0,name))
+        self.but_list[2].pack(side='left')
+        self.ent.bind("<Return>",lambda x,y=name:self.Sendshow(x,y))
+    def Sendshow(self,tmp,name):
+        global USER_NAME
+        s_str=self.ent.get()       
+        self.mess.Send(self.sock,s_str,name)
+        self.draw_a_friend(self.f_can,s_str,self.furry_l[0],
+                           (self.Canv_x, self.Canv_y, self.Win_Size[0][0], self.Canv_y+self.pic_size[1]-20,),  (self.Win_Size[0][0]-self.pic_size[0]-self.Canv_x_from, self.Canv_y+self.pic_size[1]//2,), (self.Win_Size[0][0]-self.pic_size[0]+50, self.Canv_y+45,),self.delmess)
+        self.Canv_y+=self.pic_size[1]
+    def Readshow(self):
+      while 1:
+        s_str=self.mess.get()
+        if s_str:
+            s,name=Spilt_Mess.Read_spilt(s_str)
+            print("this ",name,"   ",s,"\n")
+            if name==self.fren.talk_with:
+                i=self.fren.friend_list.index(name)
+                self.draw_a_friend(self.f_can, s, None, (self.Canv_x, self.Canv_y, self.Win_Size[0][0], self.Canv_y+self.pic_size[1],), (self.Canv_x+self.pic_size[0]+self.Canv_x_from, self.Canv_y+self.pic_size[1]//2,), (self.Canv_x+50, self.Canv_y+45,), self.delmess)
+                self.Canv_y += self.pic_size[1]
+    def delmess(self):
         pass
+    def endretu(self):
+        self.clear_Canv()
+        self.retu()
+    
+class Graphics(Talk_with):
+    def __init__(self) -> None:
+        Talk_with.__init__(self)
+        pass
+    
 
-
-class Talk_with:
-    pass
-
-
-GNU = Friend_list()
+GNU = Talk_with()
 
 
 def main(mess, sock, friends, gra):
-    mess.Send(sock, "LOGIN "+USER_NAME)
-    for i in range(MAX_THD):
-        r = th.Thread(target=mess.Read, args=(sock,))
-        r.setDaemon(True)
-        r.start()
-    gra.quickconfig(friends)
+    gra.quickconfig(friends,mess,sock)
     gra.run()
 
 

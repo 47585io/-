@@ -226,7 +226,7 @@ def main(messes, arg):
 # but, you can append it's pointer many count in messes list, you can init many frequency
 # like below
 
-messes = [message(),Group_Mess(),message(("127.0.0.1",1256))]
+messes = [message(),]
 messes.append(messes[0])
 # messes.append(users())
 

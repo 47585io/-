@@ -18,13 +18,19 @@ class users:
         #olny have  a dict, {name:(addr,port)}  #save all user, and their addr,port tup
         self.friend_list=mut.Queue()
         self.friend_list.put({})
-        #olny hava a dict, {name[friendname]}  #save user name , and he has friend name list
+        #olny hava a dict, {name[friendname]}  #save user name , and he has friend name list, also save group name and it all user
         self.now_in=mut.Queue()
         self.now_in.put([])
         #olny have a list, [name] #save now_in user
         self.cache=mut.Queue()
         self.cache.put({})
         #olny hava a dict, {name:[cachemess]} #sava can't send str, wait that user login, send all to
+        self.group=mut.Queue()
+        self.group.put([])
+        #olny hava a list, [groupname] #save all group name
+        self.tcpsend=mut.Queue()
+        self.tcpsend.put([])
+        #olny hava a list, [from,to,filepath]  #save send to filepath from who
     def search(self,going_search_queue,new_tup):
         '''going to old going_search_queue pointer's obj search to new_tup'''
         tmp=going_search_queue.get()
@@ -115,7 +121,7 @@ class message:
             lis = self.bbmess(tmp)
             print("发送", lis)
             self.Send(lis)
-
+    
     def Send(self, lis):
         '''send bytes, can redefine in sonclass'''
         self.sock.sendto(lis[0].encode(), lis[1])
@@ -129,15 +135,38 @@ class Group_Mess(message):
 
     def __init__(self, messaddr=("127.0.0.1", 1236)) -> None:
         message.__init__(self, messaddr)
+    
+    def bbmess(self, tmp):
+        lis=[]
+        s_str, groupname = Spilt_Mess.Read_spilt(tmp[0])
+        namelist=self.USERS.getto(self.USERS.friend_list,groupname)
+        addrlist=[]
+        for name in namelist:
+            addrlist.append(self.USERS.users[name])
+        myname=self.USERS.value_to_key(tmp[1])
+        s_str=Spilt_Mess.Send_spilt(s_str,myname)
+        lis.append(s_str)
+        lis.append(addrlist)
+        return lis
+                
+    def Send(self, lis):
+        '''read bytes from a user, and send all user in the group'''
+        s_str=lis[0]
+        for user in lis[1]:
+            self.sock.sendto(s_str,user)
+    #diffrent port's date, it olny give this port , all port's  process olny get itself port's date
 
-    def talk_to(self, *arg):
-      '''read bytes from a user, and send all user in the group'''
-      while 1:
-        str, addr = self.sock.recvfrom(Mess_Buffer)
-        self.sock.sendto(str, addr)
-    #diffrent port's date, it olny is  this port , all port's  process olny get itself port's date
-
-
+class TCP_Mess:
+    def __init__(self) -> None:
+        pass
+    def checkfile(self):
+        #Get From xxx To xxx
+        pass
+    def sendfile(self):
+        pass
+    def savefile(self):
+        pass
+    
 class Spilt_Mess:
     '''The class have many process mess's func'''
     @staticmethod
@@ -226,7 +255,7 @@ def main(messes, arg):
 # but, you can append it's pointer many count in messes list, you can init many frequency
 # like below
 
-messes = [message(),]
+messes = [message(),Group_Mess()]
 messes.append(messes[0])
 # messes.append(users())
 

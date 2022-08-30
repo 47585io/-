@@ -584,7 +584,7 @@ class Friend_list(Welcome):
     def clear_Canv(self,):
         '''clear Canv on old page'''
         self.f_can.delete(tk.ALL)
-        self.index = 0
+        #self.index = 0
         self.tag_list.clear()
         self.Canv_y = 0
         #self.furry_l.clear()
@@ -620,9 +620,10 @@ class Talk_with(Friend_list):
         if self.istalk==0:
             self.talk.start()
             self.istalk+=1
-        #self.but_list[1].config(command=self.endretu)
+        self.but_list[1].config(command=self.endretu)
         self.fren.talk_with=name
         self.f_can.pack()
+        self.f_scro.pack(side='right',fill=tk.Y,anchor='ne')
         self.entfarme.pack(side='left',anchor='nw')
         self.but_list[2].config(text='send',command=lambda :self.Sendshow(0,name))
         self.but_list[2].pack(side='left')
@@ -633,7 +634,7 @@ class Talk_with(Friend_list):
         self.mess.Send(self.sock,s_str,name)
         self.draw_a_friend(self.f_can,s_str,self.furry_l[0],
                            (self.Canv_x, self.Canv_y, self.Win_Size[0][0], self.Canv_y+self.pic_size[1]-20,),  (self.Win_Size[0][0]-self.pic_size[0]-self.Canv_x_from, self.Canv_y+self.pic_size[1]//2,), (self.Win_Size[0][0]-self.pic_size[0]+50, self.Canv_y+45,),self.delmess)
-        self.Canv_y+=self.pic_size[1]
+        self.Canv_y+=self.pic_size[1]+10
     def Readshow(self):
       while 1:
         s_str=self.mess.get()
@@ -642,11 +643,11 @@ class Talk_with(Friend_list):
             print("this ",name,"   ",s,"\n")
             if name==self.fren.talk_with:
                 i=self.fren.friend_list.index(name)
-                self.draw_a_friend(self.f_can, s, None, (self.Canv_x, self.Canv_y, self.Win_Size[0][0], self.Canv_y+self.pic_size[1],), (self.Canv_x+self.pic_size[0]+self.Canv_x_from, self.Canv_y+self.pic_size[1]//2,), (self.Canv_x+50, self.Canv_y+45,), self.delmess)
-                self.Canv_y += self.pic_size[1]
+                self.draw_a_friend(self.f_can, s, None, (self.Canv_x, self.Canv_y, self.Win_Size[0][0], self.Canv_y+self.pic_size[1]-20,), (self.Canv_x+self.pic_size[0]+self.Canv_x_from, self.Canv_y+self.pic_size[1]//2,), (self.Canv_x+50, self.Canv_y+45,), self.delmess)
+                self.Canv_y += self.pic_size[1]+10
     def delmess(self):
         pass
-    def endretu(self):
+    def endretu(self): 
         self.clear_Canv()
         self.retu()
     

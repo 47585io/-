@@ -207,6 +207,20 @@ class Spilt_Mess:
         index = s_str.find(':')
         return (int(s_str[0:index:]), s_str[index+1::])
 
+    @staticmethod
+    def Send_mess_spilt(fromwho, to, filename):
+        return ("Send From " + fromwho + " To " + to + " " + filename).encode()
+
+    @staticmethod
+    def Get_mess_spilt(fromwho, to, filename):
+        return ("Get From " + fromwho + " To " + to + " " + filename).encode()
+
+    @staticmethod
+    def File_spilt(s_str):
+        #From who to me's filename
+        s_str = s_str.decode()
+        lis = s_str.split(" ", 5)
+        return (lis[2], lis[4], lis[5])
 
 class Welcome:
     '''the welcom class, can show welcome page and switch page'''
@@ -513,7 +527,7 @@ class Friend_list(Welcome):
                                     activefill=self.Color['ffg'], outline=self.Color['bg'], width=0)
         if canv:
             canv.create_image(picpos[0], picpos[1], image=pic,)
-        canv.create_text(namepos[0], namepos[1],
+        canv.create_text(namepos[0], namepos[1],width=relapos[3]-relapos[0],
                          text=name, fill=self.Color['fg'], font=(self.Font["zheng"], self.Font_size["mid"]))
         self.f_can.tag_bind(tag, '<Button-1>', func)
         self.tag_list.append(tag)
@@ -655,7 +669,7 @@ class Talk_with(Friend_list):
         s_str = self.ent.get()
         self.mess.Send(self.sock, s_str, name)
         self.draw_a_friend(self.f_can, s_str, self.furry_l[0],
-                           (self.Canv_x+30, self.Canv_y, self.Win_Size[0][0], self.Canv_y+self.pic_size[1]-20,),  (self.Canv_x+self.Canv_x_from, self.Canv_y+10,), (self.Win_Size[0][0]-self.pic_size[0]+50, self.Canv_y+45,), self.delmess, self.Color['bubu1'])
+                           (self.Canv_x+30, self.Canv_y, self.Win_Size[0][0], self.Canv_y+self.pic_size[1]-20,),  (self.Canv_x+20, self.Canv_y+10,), (self.Win_Size[0][0]-self.pic_size[0]+50, self.Canv_y+45,), self.delmess, self.Color['bubu1'])
         self.Canv_y += self.pic_size[1]+10
 
     def Readshow(self):
@@ -678,10 +692,6 @@ class Talk_with(Friend_list):
         self.retu()
 
 
-class Graphics(Talk_with):
-    def __init__(self) -> None:
-        Talk_with.__init__(self)
-        pass
 
 
 GNU = Talk_with()

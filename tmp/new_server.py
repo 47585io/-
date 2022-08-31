@@ -31,9 +31,6 @@ class users:
         self.group=mut.Queue()
         self.group.put(['one'])
         #olny hava a list, [groupname] #save all group name
-        self.tcpsend=mut.Queue()
-        self.tcpsend.put([])
-        #olny hava a list, [from,to,filepath]  #save send to filepath from who
     def search(self,going_search_queue,new_tup):
         '''going to old going_search_queue pointer's obj search to new_tup'''
         tmp=going_search_queue.get()
@@ -173,12 +170,16 @@ class TCP_Mess:
             os.mkdir("./From/"+tup[0])
         if not os.path.isdir("./From/"+tup[0]+"/"+tup[1]):
             os.mkdir("./From/"+tup[0]+"/"+tup[1])
+    
     def sendfile(self,new_sock,addr,tup):
         '''if user want to get a file, i must send to he'''
         self.checkfile(tup)
+        if not os.path.isfile("./From/"+tup[0]+"/"+tup[1]+"/"+tup[2]):
+            return
         size=os.path.getsize("./From/"+tup[0]+"/"+tup[1]+"/"+tup[2])
         file = open("./From/"+tup[0]+"/"+tup[1]+"/"+tup[2], "rb")
         new_sock.send('Ok'.encode())
+        print("./From/"+tup[0]+"/"+tup[1]+"/"+tup[2])
         while size>0:
             date=file.read(Mess_Buffer)
             new_sock.send(date)
@@ -213,7 +214,9 @@ class TCP_Mess:
                 self.sendfile(new_sock,addr,s_list)
             else:
                 self.savefile(new_sock, addr,s_list)
-      except Exception:    
+            new_sock.close()
+      except Exception as e: 
+          print(e)   
           new_sock.close()
     
 class Spilt_Mess:
@@ -317,7 +320,7 @@ def main(messes, arg):
 # like below
 
 messes = [message(),TCP_Mess()]
-messes.append(messes[0])
+#messes.append(messes[0])
 # messes.append(users())
 
 def whenexit():

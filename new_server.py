@@ -3,6 +3,9 @@ from concurrent import futures as fu
 import multiprocessing as mut
 import threading as th
 import atexit
+from urllib.parse import ParseResult
+import os
+from sympy import sqf_list
 
 PRO_MAX = 1
 # 设置要为每个server init's process and sline count
@@ -26,7 +29,7 @@ class users:
         self.cache.put({})
         #olny hava a dict, {name:[cachemess]} #sava can't send str, wait that user login, send all to
         self.group=mut.Queue()
-        self.group.put([])
+        self.group.put(['one'])
         #olny hava a list, [groupname] #save all group name
         self.tcpsend=mut.Queue()
         self.tcpsend.put([])
@@ -59,7 +62,8 @@ class users:
     def get_friend_list(self):
         '''return user input's search after mess'''
         tmp=self.getto(self.users)
-        return str(tmp.keys())       
+        tmp2=self.getto(self.group)
+        return str(tmp.keys())+"+"+str(tmp2)     
     def Login(self,tup):
         '''when user login, call it'''
         name = tup[0].decode()
@@ -138,6 +142,7 @@ class Group_Mess(message):
     
     def bbmess(self, tmp):
         lis=[]
+        print("Group!")
         s_str, groupname = Spilt_Mess.Read_spilt(tmp[0])
         namelist=self.USERS.getto(self.USERS.friend_list,groupname)
         addrlist=[]
@@ -157,15 +162,52 @@ class Group_Mess(message):
     #diffrent port's date, it olny give this port , all port's  process olny get itself port's date
 
 class TCP_Mess:
-    def __init__(self) -> None:
-        pass
-    def checkfile(self):
-        #Get From xxx To xxx
-        pass
-    def sendfile(self):
-        pass
-    def savefile(self):
-        pass
+    def __init__(self,addr=("127.0.0.1",1237)) -> None:
+        self.sock=socket.socket()
+        self.sock.bind(addr)
+        self.sock.listen(20)
+        if not os.path.isdir("./From"):
+            os.mkdir("./From")
+    def checkfile(self,tup):
+        '''search a file or mkdir on server mkdir'''
+        if not os.path.isdir("./From/"+tup[0]):
+            os.mkdir("./From/"+tup[0])
+        if not os.path.isdir("./From/"+tup[0]+"/"+tup[1]):
+            os.mkdir("./From/"+tup[0]+"/"+tup[1])
+    def sendfile(self,new_sock,addr,tup):
+        '''if user want to get a file, i must send to he'''
+        self.checkfile(tup)
+        size=os.path.getsize("./From/"+tup[0]+"/"+tup[1]+"/"+tup[2])
+        file = open("./From/"+tup[0]+"/"+tup[1]+"/"+tup[2], "rb")
+        new_sock.send('Ok'.encode())
+        while size>0:
+            date=file.read(Mess_Buffer)
+            new_sock.send(date)
+            size-=Mess_Buffer
+        file.close()
+
+    def savefile(self, new_sock, addr,tup):
+        '''if user want to send a file to me, i must save it'''
+        self.checkfile(tup)
+        file=open("./From/"+tup[0]+"/"+tup[1]+"/"+tup[2],"wb")
+        print("i have a dream , is can save a file")
+        new_sock.send('Ok'.encode())
+        while 1:
+            date=new_sock.recv(Mess_Buffer)
+            file.write(date)
+        file.close()
+        
+    def talk_to(self,*arg):
+        '''before do any thing, Let's see what it is'''
+        while 1:
+            new_sock,addr=self.sock.accept()
+            s_str=new_sock.recv(Mess_Buffer)
+            s_list=Spilt_Mess.File_spilt(s_str)
+            if s_str.decode().startswith('Get'):
+                self.sendfile(new_sock,addr,s_list)
+            else:
+                self.savefile(new_sock, addr,s_list)
+            new_sock.close()
     
 class Spilt_Mess:
     '''The class have many process mess's func'''
@@ -225,8 +267,20 @@ class Spilt_Mess:
         s_str = s_str.decode()
         index = s_str.find(':')
         return (int(s_str[0:index:]), s_str[index+1::])
-
-
+    
+    @staticmethod
+    def Send_mess_spilt(fromwho,to,filename):
+        return ("Send From "+ fromwho + " To " +to +" " +filename).encode()
+    @staticmethod
+    def Get_mess_spilt(fromwho,to,filename):
+        return ("Get From " + fromwho + " To " + to +" "+ filename).encode()
+    @staticmethod
+    def File_spilt(s_str):
+        #From who to me's filename
+        s_str=s_str.decode()
+        lis=s_str.split(" ",5)
+        return (lis[2],lis[4],lis[5])
+    
 def start(mess, arg):
     #pool = fu.ThreadPoolExecutor(PRO_MAX)
     for i in range(PRO_MAX):
@@ -255,7 +309,7 @@ def main(messes, arg):
 # but, you can append it's pointer many count in messes list, you can init many frequency
 # like below
 
-messes = [message(),Group_Mess()]
+messes = [message(),TCP_Mess()]
 messes.append(messes[0])
 # messes.append(users())
 

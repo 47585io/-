@@ -13,12 +13,9 @@
 	<!--@style/myactiTheme-->
 	<style name="myactiTheme">
 		<item name="android:activityOpenEnterAnimation">@anim/actTab</item>
-
-		<item name="android:activityOpenExitAnimation">@anim/actTab</item>
-
+		
 		<item name="android:activityCloseEnterAnimation">@anim/actTab</item>
 
-		<item name="android:activityCloseExitAnimation">@anim/actTab</item>
-		<!--4个动画全部都是@anim/actTab-->
+			<!--4个动画全部都是@anim/actTab-->
 	</style>
 </resources>

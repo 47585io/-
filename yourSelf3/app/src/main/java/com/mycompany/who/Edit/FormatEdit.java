@@ -34,12 +34,14 @@ public class FormatEdit extends CompleteEdit
 		}
 		//如果正被修改，则不允许修改
 		reSAll(start,start+lengthAfter,"\t","    ");	
-		if(text.toString().indexOf('\n',start)!=-1&&lengthAfter<6&&lengthBefore==0){
-			if(Enabled_Format){
+		if(lengthAfter<6&&lengthBefore==0){
+			if(Enabled_Format){		
 				Insert(start);
-			    Format(start,start+lengthAfter);	
+				if(text.toString().indexOf('\n',start)!=-1)
+			        Format(start,start+lengthAfter);	
 			}
 		}
+		
 		super.onTextChanged(text, start, lengthBefore, lengthAfter);
 
 	}
@@ -231,20 +233,20 @@ public class FormatEdit extends CompleteEdit
 					String src=editor.toString();
 					int charIndex=Array_Splitor.indexOf(src.charAt(nowIndex),insertarr);
 					if(charIndex!=-1){
-						switch(charIndex){
-							case 0:
+						switch(src.charAt(nowIndex)){
+							case '{':
 								editor.insert(nowIndex+1,"}");
 								break;
-							case 1:
+							case '(':
 								editor.insert(nowIndex+1,")");
 								break;
-							case 2:
+							case '[':
 								editor.insert(nowIndex+1,"]");
 								break;
-							case 3:
+							case '\'':
 								editor.insert(nowIndex+1,"'");
 								break;
-							case 4:
+							case '"':
 								editor.insert(nowIndex+1,"\"");
 								break;
 						}
@@ -265,7 +267,9 @@ public class FormatEdit extends CompleteEdit
 	public void startInsert(int index,ArrayList<Insertor> totalList){
 		IsModify=true;
 		for(Insertor total:totalList){
-			total.dothing_insert(getText(),index);
+			try{
+			    total.dothing_insert(getText(),index);
+			}catch(Exception e){}
 		}
 		IsModify=false;
 	}	

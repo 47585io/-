@@ -9,6 +9,7 @@ import android.widget.*;
 import com.mycompany.who.Edit.*;
 import com.mycompany.who.Share.*;
 import java.util.*;
+import android.content.*;
 
 public class MainActivity extends Activity
 {
@@ -22,6 +23,8 @@ public class MainActivity extends Activity
 	
 	private myLog log;
 	private FileList files;
+	
+	private Intent i1;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -37,6 +40,7 @@ public class MainActivity extends Activity
 		CodeEdit.Enabled_Drawer=true;
 		CodeEdit.Enabled_Complete=true;
 		CodeEdit.Enabled_MakeHTML=true;
+		configActivity();
     }
 	
 	private void initActivity()
@@ -48,8 +52,11 @@ public class MainActivity extends Activity
 		mWindow=findViewById(R.id.Window);
 		log=new myLog("/storage/emulated/0/Linux/share.html");	
 		files=new FileList();
+		i1=new Intent();
 	}
-	
+	public void configActivity(){
+		i1.setClass(this,SetingPage.class);
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
@@ -94,7 +101,7 @@ public class MainActivity extends Activity
 			Edit.Format(0,Edit.getText().toString().length());
 			break;
 		case 6:
-			
+			startActivity(i1);
 			break;
 		}
 		}catch(Exception e){}

@@ -42,5 +42,33 @@
 
 	</ScrollView>
 
+	<SlidingDrawer
+		android:layout_width="match_parent"
+		android:layout_height="500px"
+		android:orientation="vertical"
+		android:handle="@+id/handle"
+		android:content="@+id/content"
+		android:layout_alignParentBottom="true">
+
+		<ImageView
+			android:id="@+id/handle"
+			android:layout_width="match_parent"
+			android:layout_height="30px"/>
+
+		<LinearLayout
+			android:id="@+id/content"
+			android:layout_height="match_parent"
+			android:layout_width="match_parent"
+			android:background="#FF23282E">
+
+			<Button
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Button"/>
+
+		</LinearLayout>
+
+	</SlidingDrawer>
+
 </RelativeLayout>
 

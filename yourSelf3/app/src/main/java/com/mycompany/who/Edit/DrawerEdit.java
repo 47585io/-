@@ -87,9 +87,11 @@ public class DrawerEdit extends EditText
 		int i;
 		Editable editor=getText();
 		String text = editor.toString().substring(start,end);
+		try{
 		for(i=nodes.size()-1;i>-1;i--)
 		//在Edit中的真实下标开始，将范围内的单词染色
 		    editor.replace(nodes.get(i).start+start,nodes.get(i).end+start,String_Splitor. colorText(text.substring(nodes.get(i).start,nodes.get(i).end),WordLib.fromByteToColor(nodes.get(i).b)));
+		}catch(Exception e){}
 		IsModify=false;
 	}
 	public void DrawS(int start,int end,ArrayList<wordIndexS> nodes){
@@ -420,6 +422,10 @@ public class DrawerEdit extends EditText
 						if(src.charAt(nowIndex+1)=='\\'){
 							nodes.add(new wordIndex(nowIndex,nowIndex+4,(byte)1));
 							nowIndex+=3;	
+						}
+						else if(src.charAt(nowIndex+1)=='\''){
+							nodes.add(new wordIndex(nowIndex,nowIndex+2,(byte)1));
+							nowIndex+=1;	
 						}
 						else{		
 						    nodes.add(new wordIndex(nowIndex,nowIndex+3,(byte)1));
